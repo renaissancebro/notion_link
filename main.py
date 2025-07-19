@@ -179,14 +179,10 @@ if __name__ == "__main__":
         print("="*60)
 
         if today_entries:
-        for i, entry in enumerate(today_entries):
-            print(f"\n=== Entry {i + 1} ===")
-            print(f"Page ID: {entry['page_id']}")
-            
-            # Show when the page was last edited
-            if entry["content"] and entry["content"]["page_details"]:
-                last_edited = entry["content"]["page_details"].get("last_edited_time")
-                print(f"Last edited: {last_edited}")
+            for i, entry in enumerate(today_entries):
+                print(f"\n=== Entry {i + 1} ===")
+                display_entry(entry)
+                print("-" * 40)
 
             # Print Journal property content (handle both title and rich_text types)
             journal_prop = entry["properties"].get("Journal")
