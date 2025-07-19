@@ -145,8 +145,43 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         arg = sys.argv[1]
         
+        # Check for special commands
+        if arg.lower() in ['edited', '--edited', '-e']:
+            print("Scanning for edited entries...")
+            print("="*60)
+            
+            edited_entries = find_edited_entries()
+            if edited_entries:
+                print(f"Found {len(edited_entries)} edited entries:")
+                for entry in edited_entries:
+                    print(f"\nDate: {entry['date']}")
+                    print(f"Title: {entry['title']}")
+                    print(f"ID: {entry['id']}")
+                    print(f"Created: {entry['created']}")
+                    print(f"Last edited: {entry['last_edited']}")
+                    print("-" * 40)
+                
+                # Show the most recently edited entry in detail
+                if edited_entries:
+                    most_recent = edited_entries[0]  # They should be sorted by date
+                    print(f"\n{'='*60}")
+                    print(f"MOST RECENTLY EDITED ENTRY:")
+                    print(f"{'='*60}")
+                    
+                    # Get full entry details
+                    full_entry = get_entry_by_id(most_recent['id'])
+                    if full_entry:
+                        display_entry(full_entry)
+            else:
+                print("No edited entries found. All entries have the same created and last_edited times.")
+                print("This means either:")
+                print("1. No entries have been edited after creation")
+                print("2. Edits were made to the title/properties only")
+                print("3. Edits haven't been saved properly in Notion")
+            return
+        
         # Check if it's a date (YYYY-MM-DD format) or page ID
-        if len(arg) == 10 and arg.count('-') == 2:
+        elif len(arg) == 10 and arg.count('-') == 2:
             # It's a date
             try:
                 target_date = datetime.datetime.strptime(arg, '%Y-%m-%d').date()
