@@ -3,6 +3,7 @@ from notion_fetcher import (
     query_database_by_date,
     get_entries_for_date,
     get_page_content,
+    get_all_recent_entries,
 )
 from datetime import date
 
