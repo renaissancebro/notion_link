@@ -16,7 +16,15 @@ from notion_client import APIErrorCode, APIResponseError, Client
 load_dotenv()
 
 DATABASE_ID = os.getenv("DATABASE_ID")
-notion = Client(auth=os.environ["NOTION_TOKEN"])
+NOTION_TOKEN = os.getenv("NOTION_TOKEN")
+
+print(f"DATABASE_ID loaded: {DATABASE_ID is not None}")
+print(f"NOTION_TOKEN loaded: {NOTION_TOKEN is not None}")
+
+if DATABASE_ID:
+    print(f"DATABASE_ID first 4 chars: {DATABASE_ID[:4]}")
+
+notion = Client(auth=NOTION_TOKEN)
 
 
 def query_database_by_date(specific_date=None):
