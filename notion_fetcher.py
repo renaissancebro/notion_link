@@ -22,9 +22,14 @@ print(f"DATABASE_ID loaded: {DATABASE_ID is not None}")
 print(f"NOTION_TOKEN loaded: {NOTION_TOKEN is not None}")
 
 if DATABASE_ID:
-    print(f"DATABASE_ID: {DATABASE_ID}")
+    print(f"DATABASE_ID from .env: {DATABASE_ID}")
     # Clean the database ID (remove dashes if present)
     DATABASE_ID = DATABASE_ID.replace("-", "")
+    
+    # For testing, use the accessible database
+    ACCESSIBLE_DB_ID = "1f69719cdbb3805bb98fe2dc0323cc7a"
+    print(f"Using accessible database for testing: {ACCESSIBLE_DB_ID}")
+    DATABASE_ID = ACCESSIBLE_DB_ID
 
 notion = Client(auth=NOTION_TOKEN)
 
