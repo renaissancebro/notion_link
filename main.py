@@ -140,19 +140,41 @@ today_entries = get_entries_for_date(today)
 
 
 if __name__ == "__main__":
-    # Check if a specific page ID was provided as command line argument
+    # Check if a specific page ID or date was provided as command line argument
     if len(sys.argv) > 1:
-        page_id = sys.argv[1]
-        print(f"Fetching specific entry with ID: {page_id}")
-        print("="*60)
+        arg = sys.argv[1]
         
-        entry = get_entry_by_id(page_id)
-        if entry:
-            print(f"\n=== Entry Details ===")
-            display_entry(entry)
-            print("-" * 40)
+        # Check if it's a date (YYYY-MM-DD format) or page ID
+        if len(arg) == 10 and arg.count('-') == 2:
+            # It's a date
+            try:
+                target_date = datetime.datetime.strptime(arg, '%Y-%m-%d').date()
+                print(f"Fetching entries for date: {target_date}")
+                print("="*60)
+                
+                date_entries = get_entries_for_date(target_date)
+                if date_entries:
+                    for i, entry in enumerate(date_entries):
+                        print(f"\n=== Entry {i + 1} for {target_date} ===")
+                        display_entry(entry)
+                        print("-" * 40)
+                else:
+                    print(f"No entries found for {target_date}")
+            except ValueError:
+                print(f"Invalid date format: {arg}. Use YYYY-MM-DD format.")
         else:
-            print("Entry not found or error occurred.")
+            # It's a page ID
+            page_id = arg
+            print(f"Fetching specific entry with ID: {page_id}")
+            print("="*60)
+            
+            entry = get_entry_by_id(page_id)
+            if entry:
+                print(f"\n=== Entry Details ===")
+                display_entry(entry)
+                print("-" * 40)
+            else:
+                print("Entry not found or error occurred.")
     
     else:
         print(f"Fetching journal entries for today: {today}")
