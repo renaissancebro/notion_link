@@ -178,7 +178,7 @@ if __name__ == "__main__":
                 print("1. No entries have been edited after creation")
                 print("2. Edits were made to the title/properties only")
                 print("3. Edits haven't been saved properly in Notion")
-            return
+            sys.exit(0)
         
         # Check if it's a date (YYYY-MM-DD format) or page ID
         elif len(arg) == 10 and arg.count('-') == 2:
