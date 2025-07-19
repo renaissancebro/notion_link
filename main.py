@@ -6,6 +6,7 @@ from notion_fetcher import (
     get_page_content,
     get_all_recent_entries,
     get_entry_by_id,
+    find_edited_entries,
 )
 from datetime import date
 
