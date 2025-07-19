@@ -95,6 +95,33 @@ def get_all_recent_entries():
         return None
 
 
+def get_entry_by_id(page_id):
+    """
+    Get a specific entry by its page ID.
+    """
+    try:
+        print(f"Fetching entry with ID: {page_id}")
+        
+        # Get page details
+        page = notion.pages.retrieve(page_id=page_id)
+        print(f"Page last edited: {page.get('last_edited_time')}")
+        
+        # Get page content
+        page_content = get_page_content(page_id)
+        
+        if page_content:
+            return {
+                "page_id": page_id,
+                "properties": page.get("properties", {}),
+                "content": page_content,
+            }
+        return None
+        
+    except APIResponseError as error:
+        print(f"Error retrieving entry by ID: {error}")
+        return None
+
+
 def get_page_content(page_id):
     """
     Retrieve the content/blocks of a specific Notion page.
