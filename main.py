@@ -140,29 +140,45 @@ today_entries = get_entries_for_date(today)
 
 
 if __name__ == "__main__":
-    print(f"Fetching journal entries for today: {today}")
+    # Check if a specific page ID was provided as command line argument
+    if len(sys.argv) > 1:
+        page_id = sys.argv[1]
+        print(f"Fetching specific entry with ID: {page_id}")
+        print("="*60)
+        
+        entry = get_entry_by_id(page_id)
+        if entry:
+            print(f"\n=== Entry Details ===")
+            display_entry(entry)
+            print("-" * 40)
+        else:
+            print("Entry not found or error occurred.")
     
-    # First, let's see what entries are available in the database
-    print("\n" + "="*60)
-    print("CHECKING ALL RECENT ENTRIES IN DATABASE:")
-    print("="*60)
-    recent_entries = get_all_recent_entries()
-    if recent_entries and recent_entries.get("results"):
-        for i, entry in enumerate(recent_entries["results"]):
-            date_prop = entry["properties"].get("Date", {}).get("date")
-            entry_date = date_prop.get("start") if date_prop else "No date"
-            journal_prop = entry["properties"].get("Journal", {})
-            if journal_prop.get("title"):
-                title = journal_prop["title"][0].get("plain_text", "No title")
-            else:
-                title = "No title"
-            print(f"{i+1}. Date: {entry_date} | Title: {title} | ID: {entry['id']}")
-    
-    print("\n" + "="*60)
-    print(f"NOW LOOKING FOR TODAY'S ENTRIES ({today}):")
-    print("="*60)
+    else:
+        print(f"Fetching journal entries for today: {today}")
+        print("Usage: python main.py [page_id] - to fetch a specific entry by ID")
+        
+        # First, let's see what entries are available in the database
+        print("\n" + "="*60)
+        print("CHECKING ALL RECENT ENTRIES IN DATABASE:")
+        print("="*60)
+        recent_entries = get_all_recent_entries()
+        if recent_entries and recent_entries.get("results"):
+            for i, entry in enumerate(recent_entries["results"]):
+                date_prop = entry["properties"].get("Date", {}).get("date")
+                entry_date = date_prop.get("start") if date_prop else "No date"
+                journal_prop = entry["properties"].get("Journal", {})
+                if journal_prop.get("title"):
+                    title = journal_prop["title"][0].get("plain_text", "No title")
+                else:
+                    title = "No title"
+                print(f"{i+1}. Date: {entry_date} | Title: {title} | ID: {entry['id']}")
+        
+        print("\n" + "="*60)
+        print(f"NOW LOOKING FOR TODAY'S ENTRIES ({today}):")
+        print("="*60)
 
-    if today_entries:
+        if today_entries:
         for i, entry in enumerate(today_entries):
             print(f"\n=== Entry {i + 1} ===")
             print(f"Page ID: {entry['page_id']}")
