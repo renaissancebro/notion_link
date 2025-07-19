@@ -4,14 +4,101 @@ Notion integration grabs database and pages and returns for use in OpenAI or oth
 
 """
 
+import datetime
 import requests
 import json
 from datetime import date
 from dotenv import load_dotenv
 import os
+from pprint import pprint
+from notion_client import APIErrorCode, APIResponseError, Client
 
 load_dotenv()
 
-# Keys
-NOTION_KEY = os.getenv("INTERNAL_INTEGRATION_SECRET")
-OPENAI_KEy = os.getenv("OPENAI_API_KEY")
+DATABASE_ID = os.getenv("DATABASE_ID")
+notion = Client(auth=os.environ["NOTION_TOKEN"])
+
+def query_database_by_date(specific_date=None):
+    """
+    Query the Notion database for entries on a specific date.
+    If no date is provided, uses today's date.
+    """
+    if specific_date is None:
+        specific_date = date.today().isoformat()
+    elif isinstance(specific_date, date):
+        specific_date = specific_date.isoformat()
+    
+    try:
+        response = notion.databases.query(
+            database_id=DATABASE_ID,
+            filter={
+                "property": "Date",
+                "date": {
+                    "equals": specific_date
+                }
+            }
+        )
+        return response
+    except APIResponseError as error:
+        if error.code == APIErrorCode.ObjectNotFound:
+            print(f"Database not found: {DATABASE_ID}")
+        else:
+            print(f"API Error: {error}")
+        return None
+
+def get_page_content(page_id):
+    """
+    Retrieve the content/blocks of a specific Notion page.
+    """
+    try:
+        # Get page details
+        page = notion.pages.retrieve(page_id=page_id)
+        
+        # Get page content (blocks)
+        blocks = notion.blocks.children.list(block_id=page_id)
+        
+        return {
+            "page_details": page,
+            "content_blocks": blocks
+        }
+    except APIResponseError as error:
+        print(f"Error retrieving page content: {error}")
+        return None
+
+def get_entries_for_date(target_date=None):
+    """
+    Get all entries for a specific date and their page content.
+    """
+    # Query database for entries on the target date
+    query_result = query_database_by_date(target_date)
+    
+    if not query_result or not query_result.get("results"):
+        print(f"No entries found for date: {target_date or 'today'}")
+        return []
+    
+    entries_with_content = []
+    
+    for page in query_result["results"]:
+        page_id = page["id"]
+        page_content = get_page_content(page_id)
+        
+        entries_with_content.append({
+            "page_id": page_id,
+            "properties": page["properties"],
+            "content": page_content
+        })
+    
+    return entries_with_content
+
+# Example usage
+if __name__ == "__main__":
+    # Test the functions
+    print("Testing Notion fetcher...")
+    
+    # Get entries for today
+    today_entries = get_entries_for_date()
+    print(f"Found {len(today_entries)} entries for today")
+    
+    # Get entries for a specific date
+    # specific_entries = get_entries_for_date("2024-01-15")
+    # print(f"Found {len(specific_entries)} entries for 2024-01-15")
