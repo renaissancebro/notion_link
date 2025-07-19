@@ -178,7 +178,10 @@ if __name__ == "__main__":
     
     else:
         print(f"Fetching journal entries for today: {today}")
-        print("Usage: python main.py [page_id] - to fetch a specific entry by ID")
+        print("Usage:")
+        print("  python main.py                    - Show all recent entries + today's entries")
+        print("  python main.py YYYY-MM-DD         - Show entries for specific date")
+        print("  python main.py [page_id]          - Show specific entry by ID")
         
         # First, let's see what entries are available in the database
         print("\n" + "="*60)
