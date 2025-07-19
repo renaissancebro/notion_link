@@ -95,6 +95,55 @@ def get_all_recent_entries():
         return None
 
 
+def find_edited_entries():
+    """
+    Find all entries that have been edited (last_edited_time != created_time).
+    """
+    try:
+        # Get more entries to check for edits
+        response = notion.databases.query(
+            database_id=DATABASE_ID,
+            sorts=[
+                {
+                    "property": "Date",
+                    "direction": "descending"
+                }
+            ],
+            page_size=50  # Check last 50 entries
+        )
+        
+        edited_entries = []
+        if response and response.get("results"):
+            for entry in response["results"]:
+                created_time = entry.get("created_time")
+                last_edited_time = entry.get("last_edited_time")
+                
+                # Check if the entry has been edited after creation
+                if created_time != last_edited_time:
+                    date_prop = entry["properties"].get("Date", {}).get("date")
+                    entry_date = date_prop.get("start") if date_prop else "No date"
+                    journal_prop = entry["properties"].get("Journal", {})
+                    if journal_prop.get("title"):
+                        title = journal_prop["title"][0].get("plain_text", "No title")
+                    else:
+                        title = "No title"
+                    
+                    edited_entries.append({
+                        "id": entry["id"],
+                        "date": entry_date,
+                        "title": title,
+                        "created": created_time,
+                        "last_edited": last_edited_time,
+                        "entry": entry
+                    })
+        
+        return edited_entries
+        
+    except APIResponseError as error:
+        print(f"Error finding edited entries: {error}")
+        return []
+
+
 def get_entry_by_id(page_id):
     """
     Get a specific entry by its page ID.
