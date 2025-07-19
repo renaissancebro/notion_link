@@ -31,21 +31,76 @@ if __name__ == "__main__":
                     print("Journal Content:")
                     print(journal_text)
             
-            # Print content from blocks if available
+            # Print full content from blocks (this contains the actual journal content)
             if entry["content"] and entry["content"]["content_blocks"]:
                 blocks = entry["content"]["content_blocks"]["results"]
-                block_text = []
+                print("\nFull Journal Content:")
+                print("=" * 50)
+                
                 for block in blocks:
                     block_type = block.get("type")
-                    if block_type and "text" in block.get(block_type, {}):
-                        texts = block[block_type]["text"]
-                        for t in texts:
-                            if "plain_text" in t:
-                                block_text.append(t["plain_text"])
+                    
+                    # Handle different block types
+                    if block_type == "paragraph" and block.get("paragraph", {}).get("rich_text"):
+                        texts = block["paragraph"]["rich_text"]
+                        paragraph_text = "".join([t.get("plain_text", "") for t in texts])
+                        if paragraph_text.strip():
+                            print(paragraph_text)
+                    
+                    elif block_type == "heading_1" and block.get("heading_1", {}).get("rich_text"):
+                        texts = block["heading_1"]["rich_text"]
+                        heading_text = "".join([t.get("plain_text", "") for t in texts])
+                        if heading_text.strip():
+                            print(f"\n# {heading_text}")
+                    
+                    elif block_type == "heading_2" and block.get("heading_2", {}).get("rich_text"):
+                        texts = block["heading_2"]["rich_text"]
+                        heading_text = "".join([t.get("plain_text", "") for t in texts])
+                        if heading_text.strip():
+                            print(f"\n## {heading_text}")
+                    
+                    elif block_type == "heading_3" and block.get("heading_3", {}).get("rich_text"):
+                        texts = block["heading_3"]["rich_text"]
+                        heading_text = "".join([t.get("plain_text", "") for t in texts])
+                        if heading_text.strip():
+                            print(f"\n### {heading_text}")
+                    
+                    elif block_type == "bulleted_list_item" and block.get("bulleted_list_item", {}).get("rich_text"):
+                        texts = block["bulleted_list_item"]["rich_text"]
+                        list_text = "".join([t.get("plain_text", "") for t in texts])
+                        if list_text.strip():
+                            print(f"• {list_text}")
+                    
+                    elif block_type == "numbered_list_item" and block.get("numbered_list_item", {}).get("rich_text"):
+                        texts = block["numbered_list_item"]["rich_text"]
+                        list_text = "".join([t.get("plain_text", "") for t in texts])
+                        if list_text.strip():
+                            print(f"1. {list_text}")
+                    
+                    elif block_type == "to_do" and block.get("to_do", {}).get("rich_text"):
+                        texts = block["to_do"]["rich_text"]
+                        todo_text = "".join([t.get("plain_text", "") for t in texts])
+                        checked = block["to_do"].get("checked", False)
+                        checkbox = "☑" if checked else "☐"
+                        if todo_text.strip():
+                            print(f"{checkbox} {todo_text}")
+                    
+                    elif block_type == "quote" and block.get("quote", {}).get("rich_text"):
+                        texts = block["quote"]["rich_text"]
+                        quote_text = "".join([t.get("plain_text", "") for t in texts])
+                        if quote_text.strip():
+                            print(f"> {quote_text}")
+                    
+                    elif block_type == "code" and block.get("code", {}).get("rich_text"):
+                        texts = block["code"]["rich_text"]
+                        code_text = "".join([t.get("plain_text", "") for t in texts])
+                        language = block["code"].get("language", "")
+                        if code_text.strip():
+                            print(f"```{language}")
+                            print(code_text)
+                            print("```")
                 
-                if block_text:
-                    print("Additional Content from Blocks:")
-                    print("\n".join(block_text))
+                print("=" * 50)
             
             print("-" * 40)
     else:
