@@ -32,6 +32,13 @@ notion = Client(auth=NOTION_TOKEN)
 try:
     users = notion.users.list()
     print(f"Connection successful. Found {len(users['results'])} users.")
+    
+    # Try to search for databases/pages the integration has access to
+    search_results = notion.search(filter={"property": "object", "value": "database"})
+    print(f"Found {len(search_results['results'])} accessible databases:")
+    for db in search_results['results']:
+        print(f"  - {db['id']}: {db.get('title', [{}])[0].get('plain_text', 'Untitled')}")
+        
 except Exception as e:
     print(f"Connection failed: {e}")
 
