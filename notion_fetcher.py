@@ -18,6 +18,7 @@ load_dotenv()
 DATABASE_ID = os.getenv("DATABASE_ID")
 notion = Client(auth=os.environ["NOTION_TOKEN"])
 
+
 def query_database_by_date(specific_date=None):
     """
     Query the Notion database for entries on a specific date.
@@ -27,16 +28,11 @@ def query_database_by_date(specific_date=None):
         specific_date = date.today().isoformat()
     elif isinstance(specific_date, date):
         specific_date = specific_date.isoformat()
-    
+
     try:
         response = notion.databases.query(
             database_id=DATABASE_ID,
-            filter={
-                "property": "Date",
-                "date": {
-                    "equals": specific_date
-                }
-            }
+            filter={"property": "Date", "date": {"equals": specific_date}},
         )
         return response
     except APIResponseError as error:
@@ -46,6 +42,7 @@ def query_database_by_date(specific_date=None):
             print(f"API Error: {error}")
         return None
 
+
 def get_page_content(page_id):
     """
     Retrieve the content/blocks of a specific Notion page.
@@ -53,17 +50,15 @@ def get_page_content(page_id):
     try:
         # Get page details
         page = notion.pages.retrieve(page_id=page_id)
-        
+
         # Get page content (blocks)
         blocks = notion.blocks.children.list(block_id=page_id)
-        
-        return {
-            "page_details": page,
-            "content_blocks": blocks
-        }
+
+        return {"page_details": page, "content_blocks": blocks}
     except APIResponseError as error:
         print(f"Error retrieving page content: {error}")
         return None
+
 
 def get_entries_for_date(target_date=None):
     """
@@ -71,34 +66,47 @@ def get_entries_for_date(target_date=None):
     """
     # Query database for entries on the target date
     query_result = query_database_by_date(target_date)
-    
+
     if not query_result or not query_result.get("results"):
         print(f"No entries found for date: {target_date or 'today'}")
         return []
-    
+
     entries_with_content = []
-    
+
     for page in query_result["results"]:
         page_id = page["id"]
         page_content = get_page_content(page_id)
-        
-        entries_with_content.append({
-            "page_id": page_id,
-            "properties": page["properties"],
-            "content": page_content
-        })
-    
+
+        entries_with_content.append(
+            {
+                "page_id": page_id,
+                "properties": page["properties"],
+                "content": page_content,
+            }
+        )
+
     return entries_with_content
+
 
 # Example usage
 if __name__ == "__main__":
     # Test the functions
     print("Testing Notion fetcher...")
+
+    # Get entries for yesterday
+    yesterday = (date.today() - datetime.timedelta(days=1)).isoformat()
+    print(f"Looking for entries on: {yesterday}")
     
-    # Get entries for today
-    today_entries = get_entries_for_date()
-    print(f"Found {len(today_entries)} entries for today")
+    yesterday_entries = get_entries_for_date(yesterday)
+    print(f"Found {len(yesterday_entries)} entries for yesterday")
     
-    # Get entries for a specific date
-    # specific_entries = get_entries_for_date("2024-01-15")
-    # print(f"Found {len(specific_entries)} entries for 2024-01-15")
+    # Print details if entries found
+    if yesterday_entries:
+        for i, entry in enumerate(yesterday_entries):
+            print(f"\nEntry {i+1}:")
+            print(f"  Page ID: {entry['page_id']}")
+            print(f"  Properties: {list(entry['properties'].keys())}")
+            if entry['content'] and entry['content']['content_blocks']:
+                print(f"  Content blocks: {len(entry['content']['content_blocks']['results'])}")
+            else:
+                print("  No content blocks found")
