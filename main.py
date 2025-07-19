@@ -19,12 +19,17 @@ if __name__ == "__main__":
             print(f"\n=== Entry {i + 1} ===")
             print(f"Page ID: {entry['page_id']}")
             
-            # Print Journal property content
+            # Print Journal property content (handle both title and rich_text types)
             journal_prop = entry["properties"].get("Journal")
-            if journal_prop and "rich_text" in journal_prop and journal_prop["rich_text"]:
-                journal_text = "".join([t["plain_text"] for t in journal_prop["rich_text"] if "plain_text" in t])
-                print("Journal Content:")
-                print(journal_text)
+            if journal_prop:
+                if journal_prop["type"] == "title" and journal_prop["title"]:
+                    journal_text = "".join([t["plain_text"] for t in journal_prop["title"] if "plain_text" in t])
+                    print("Journal Title:")
+                    print(journal_text)
+                elif journal_prop["type"] == "rich_text" and journal_prop["rich_text"]:
+                    journal_text = "".join([t["plain_text"] for t in journal_prop["rich_text"] if "plain_text" in t])
+                    print("Journal Content:")
+                    print(journal_text)
             
             # Print content from blocks if available
             if entry["content"] and entry["content"]["content_blocks"]:
