@@ -77,11 +77,15 @@ def get_page_content(page_id):
     Retrieve the content/blocks of a specific Notion page.
     """
     try:
-        # Get page details
+        print(f"Fetching fresh content for page: {page_id}")
+        
+        # Get page details (this will show last_edited_time)
         page = notion.pages.retrieve(page_id=page_id)
+        print(f"Page last edited: {page.get('last_edited_time')}")
 
-        # Get page content (blocks)
+        # Get page content (blocks) - this should always fetch fresh content
         blocks = notion.blocks.children.list(block_id=page_id)
+        print(f"Retrieved {len(blocks.get('results', []))} content blocks")
 
         return {"page_details": page, "content_blocks": blocks}
     except APIResponseError as error:
