@@ -63,12 +63,35 @@ def query_database_by_date(specific_date=None):
                 "date": {"equals": specific_date}  # Use lowercase 'date' for the filter type
             },
         )
+        print(f"Found {len(response.get('results', []))} entries for date: {specific_date}")
         return response
     except APIResponseError as error:
         if error.code == APIErrorCode.ObjectNotFound:
             print(f"Database not found: {DATABASE_ID}")
         else:
             print(f"API Error: {error}")
+        return None
+
+
+def get_all_recent_entries():
+    """
+    Get all entries from the database without date filtering to see what's available.
+    """
+    try:
+        response = notion.databases.query(
+            database_id=DATABASE_ID,
+            sorts=[
+                {
+                    "property": "Date",
+                    "direction": "descending"
+                }
+            ],
+            page_size=10  # Get last 10 entries
+        )
+        print(f"Found {len(response.get('results', []))} total recent entries")
+        return response
+    except APIResponseError as error:
+        print(f"Error getting recent entries: {error}")
         return None
 
 
