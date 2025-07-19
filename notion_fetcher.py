@@ -22,9 +22,18 @@ print(f"DATABASE_ID loaded: {DATABASE_ID is not None}")
 print(f"NOTION_TOKEN loaded: {NOTION_TOKEN is not None}")
 
 if DATABASE_ID:
-    print(f"DATABASE_ID first 4 chars: {DATABASE_ID[:4]}")
+    print(f"DATABASE_ID: {DATABASE_ID}")
+    # Clean the database ID (remove dashes if present)
+    DATABASE_ID = DATABASE_ID.replace("-", "")
 
 notion = Client(auth=NOTION_TOKEN)
+
+# Test basic connection
+try:
+    users = notion.users.list()
+    print(f"Connection successful. Found {len(users['results'])} users.")
+except Exception as e:
+    print(f"Connection failed: {e}")
 
 
 def query_database_by_date(specific_date=None):
