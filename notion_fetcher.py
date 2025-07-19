@@ -25,7 +25,7 @@ if DATABASE_ID:
     print(f"DATABASE_ID from .env: {DATABASE_ID}")
     # Clean the database ID (remove dashes if present)
     DATABASE_ID = DATABASE_ID.replace("-", "")
-    
+
     # For testing, use the accessible database
     ACCESSIBLE_DB_ID = "1f69719cdbb3805bb98fe2dc0323cc7a"
     print(f"Using accessible database for testing: {ACCESSIBLE_DB_ID}")
@@ -37,13 +37,15 @@ notion = Client(auth=NOTION_TOKEN)
 try:
     users = notion.users.list()
     print(f"Connection successful. Found {len(users['results'])} users.")
-    
+
     # Try to search for databases/pages the integration has access to
     search_results = notion.search(filter={"property": "object", "value": "database"})
     print(f"Found {len(search_results['results'])} accessible databases:")
-    for db in search_results['results']:
-        print(f"  - {db['id']}: {db.get('title', [{}])[0].get('plain_text', 'Untitled')}")
-        
+    for db in search_results["results"]:
+        print(
+            f"  - {db['id']}: {db.get('title', [{}])[0].get('plain_text', 'Untitled')}"
+        )
+
 except Exception as e:
     print(f"Connection failed: {e}")
 
@@ -61,7 +63,10 @@ def query_database_by_date(specific_date=None):
     try:
         response = notion.databases.query(
             database_id=DATABASE_ID,
-            filter={"property": "Date", "date": {"equals": specific_date}},
+            filter={
+                "property": "Date",  # Use the exact property name
+                "date": {"equals": specific_date}  # Use lowercase 'date' for the filter type
+            },
         )
         return response
     except APIResponseError as error:
@@ -96,6 +101,9 @@ def get_entries_for_date(target_date=None):
     # Query database for entries on the target date
     query_result = query_database_by_date(target_date)
 
+    # After query_result = query_database_by_date(target_date)
+    print(json.dumps(query_result, indent=2))
+
     if not query_result or not query_result.get("results"):
         print(f"No entries found for date: {target_date or 'today'}")
         return []
@@ -103,6 +111,7 @@ def get_entries_for_date(target_date=None):
     entries_with_content = []
 
     for page in query_result["results"]:
+        print(page["properties"])
         page_id = page["id"]
         page_content = get_page_content(page_id)
 
@@ -125,17 +134,50 @@ if __name__ == "__main__":
     # Get entries for yesterday
     yesterday = (date.today() - datetime.timedelta(days=1)).isoformat()
     print(f"Looking for entries on: {yesterday}")
-    
+
     yesterday_entries = get_entries_for_date(yesterday)
     print(f"Found {len(yesterday_entries)} entries for yesterday")
-    
+
     # Print details if entries found
     if yesterday_entries:
         for i, entry in enumerate(yesterday_entries):
-            print(f"\nEntry {i+1}:")
+            print(f"\nEntry {i + 1}:")
             print(f"  Page ID: {entry['page_id']}")
             print(f"  Properties: {list(entry['properties'].keys())}")
-            if entry['content'] and entry['content']['content_blocks']:
-                print(f"  Content blocks: {len(entry['content']['content_blocks']['results'])}")
+
+            # Print Journal property if it exists
+            journal_prop = entry["properties"].get("Journal")
+            if journal_prop and "rich_text" in journal_prop and journal_prop["rich_text"]:
+                journal_text = "".join([t["plain_text"] for t in journal_prop["rich_text"] if "plain_text" in t])
+                print("  Journal property content:")
+                print(journal_text)
+            else:
+                print("  No Journal property content found.")
+
+            if entry["content"] and entry["content"]["content_blocks"]:
+                blocks = entry["content"]["content_blocks"]["results"]
+                print(f"  Content blocks: {len(blocks)}")
+                # Extract and print text from each block
+                block_text = []
+                for block in blocks:
+                    block_type = block.get("type")
+                    if block_type and "text" in block.get(block_type, {}):
+                        texts = block[block_type]["text"]
+                        for t in texts:
+                            if "plain_text" in t:
+                                block_text.append(t["plain_text"])
+                print("  Journal content from blocks:")
+                print("\n".join(block_text) if block_text else "    (No text found)")
             else:
                 print("  No content blocks found")
+            # Print the Journal property directly
+            if "Journal" in entry["properties"]:
+                journal_property = entry["properties"]["Journal"]
+                if journal_property["type"] == "rich_text" and journal_property["rich_text"]:
+                    # Access the plain_text of the first rich_text element
+                    journal_text = journal_property["rich_text"][0]["plain_text"]
+                    print(f"  Journal property text: {journal_text}")
+                else:
+                    print("  Journal property is empty or not of type 'rich_text'")
+            else:
+                print("  Journal property not found in entry properties")
