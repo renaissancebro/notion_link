@@ -216,6 +216,7 @@ if __name__ == "__main__":
         print(f"Fetching journal entries for today: {today}")
         print("Usage:")
         print("  python main.py                    - Show all recent entries + today's entries")
+        print("  python main.py edited             - Find and show all edited entries")
         print("  python main.py YYYY-MM-DD         - Show entries for specific date")
         print("  python main.py [page_id]          - Show specific entry by ID")
         
