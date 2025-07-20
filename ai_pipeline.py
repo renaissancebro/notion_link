@@ -147,33 +147,68 @@ Focus on creating actionable, time-bounded events that align with the user's pri
 """
     
     def process_with_openai(self, prompt):
-        """Step 3: Send to OpenAI (placeholder - you'll implement this)"""
+        """Step 3: Send to OpenAI"""
         print("🤖 Processing with OpenAI...")
         
-        # This is where you'll add your OpenAI API call
-        # Example structure:
-        """
-        import openai
+        if not self.openai_api_key:
+            return {
+                "status": "error",
+                "message": "OpenAI API key not configured",
+                "prompt_ready": True,
+                "prompt_length": len(prompt)
+            }
         
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a productivity AI assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7
-        )
-        
-        return response.choices[0].message.content
-        """
-        
-        # For now, return a placeholder
-        return {
-            "status": "placeholder",
-            "message": "OpenAI integration not yet implemented",
-            "prompt_ready": True,
-            "prompt_length": len(prompt)
-        }
+        try:
+            import openai
+            
+            # Set the API key
+            openai.api_key = self.openai_api_key
+            
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a productivity AI assistant helping entrepreneurs plan their day based on journal entries. Always respond with structured, actionable advice."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1500
+            )
+            
+            ai_response = response.choices[0].message.content
+            
+            # Try to parse JSON response if the prompt requested JSON
+            try:
+                parsed_response = json.loads(ai_response)
+                return {
+                    "status": "success",
+                    "response": parsed_response,
+                    "raw_response": ai_response,
+                    "prompt_length": len(prompt),
+                    "tokens_used": response.usage.total_tokens
+                }
+            except json.JSONDecodeError:
+                # Return as text if not valid JSON
+                return {
+                    "status": "success",
+                    "response": ai_response,
+                    "prompt_length": len(prompt),
+                    "tokens_used": response.usage.total_tokens
+                }
+                
+        except ImportError:
+            return {
+                "status": "error",
+                "message": "OpenAI library not installed. Run: pip install openai",
+                "prompt_ready": True,
+                "prompt_length": len(prompt)
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"OpenAI API error: {str(e)}",
+                "prompt_ready": True,
+                "prompt_length": len(prompt)
+            }
     
     def create_calendar_events(self, ai_response):
         """Step 4: Create Google Calendar events (placeholder)"""
