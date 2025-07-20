@@ -18,7 +18,10 @@ class AIPipeline:
     
     def __init__(self):
         self.extractor = JournalExtractor()
-        # You'll add OpenAI and Google Calendar clients here
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        if not self.openai_api_key:
+            print("⚠️ Warning: OPENAI_API_KEY not found in .env file")
+        # You'll add Google Calendar client here
     
     def extract_journal_data(self, target_date=None, include_recent=True):
         """Step 1: Extract journal data from Notion"""
