@@ -33,25 +33,22 @@ A Python-based system that extracts journal entries from Notion, processes them 
    python run.py help          # Show all usage options
    ```
 
-## Core Components
+## Architecture
 
-### `journal_extractor.py`
-Extracts and organizes journal content from Notion:
-- `JournalExtractor.get_journal_entry()` - Get entry for specific date
-- `JournalExtractor.format_for_openai()` - Format for AI processing
-- `JournalExtractor.extract_for_calendar_planning()` - Extract scheduling data
+Clean 3-concern separation in `src/` folder:
 
-### `ai_pipeline.py`
-Complete pipeline for AI processing:
-- `AIPipeline.run_full_pipeline()` - Full extraction → AI → calendar flow
-- `AIPipeline.prepare_ai_prompt()` - Generate structured prompts
-- Ready for OpenAI and Google Calendar integration
+### 📊 **Notion** (`src/notion/`)
+- **fetcher.py** - Raw Notion API calls and database queries
+- **extractor.py** - Content extraction, filtering, and AI formatting
 
-### `notion_fetcher.py`
-Core Notion API integration:
-- Database queries and content retrieval
-- Edit detection and content filtering
-- Debug tools for troubleshooting
+### 🤖 **AI** (`src/ai/`) 
+- **processor.py** - OpenAI integration and structured prompt generation
+
+### 📅 **Calendar** (`src/calendar_api/`)
+- **integration.py** - Google Calendar API and event creation
+
+### 🔧 **Pipeline** (`src/pipeline.py`)
+- **JournalAIPipeline** - Main orchestrator connecting all 3 concerns
 
 ## Testing
 
