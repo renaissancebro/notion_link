@@ -240,7 +240,7 @@ class JournalExtractor:
     
     def _extract_single_entry_for_calendar(self, entry):
         """Extract calendar-relevant data from a single entry"""
-        if not entry["has_user_content"]:
+        if not entry.get("has_user_content", False):
             return {"has_planning_data": False}
         
         content = entry["content"]
