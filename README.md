@@ -1,6 +1,6 @@
 # Journal AI Pipeline
 
-A Python-based system that extracts journal entries from Notion, processes them through AI, and integrates with Google Calendar for intelligent daily planning.
+A Python-based system that extracts journal entries from Notion, processes them through AI, and integrates with Google Calendar for intelligent daily planning. **Now with full Google Calendar integration and Central Time support!**
 
 ## Features
 
