@@ -4,11 +4,11 @@ This guide helps you set up automatic daily execution of your Journal AI Pipelin
 
 ## 🎯 What It Does
 
-**Daily Workflow**:
-1. **7:00 AM CT**: Cron triggers the pipeline
-2. **Extract**: Yesterday's journal entries from Notion
-3. **Process**: AI analyzes entries and creates daily plan
-4. **Create**: Calendar events for today based on insights
+**Evening Planning Workflow**:
+1. **7:00 PM CT**: Cron triggers the pipeline when you're active
+2. **Extract**: Today's journal entries from Notion
+3. **Process**: AI analyzes entries and creates tomorrow's plan
+4. **Create**: Calendar events for tomorrow based on insights
 5. **Log**: Results for monitoring and debugging
 
 ## 🚀 Quick Setup
