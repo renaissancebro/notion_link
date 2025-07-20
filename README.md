@@ -4,11 +4,13 @@ A Python-based system that extracts journal entries from Notion, processes them 
 
 ## Features
 
-- **Notion Integration**: Extracts journal content from Notion databases
+- **Notion Integration**: Extracts journal content from Notion databases with smart content filtering
+- **AI Processing**: OpenAI GPT-4 analysis of journal entries for actionable insights
+- **Google Calendar Integration**: Automatically creates time-blocked calendar events
 - **Smart Content Filtering**: Separates user-written content from template text
-- **AI Processing**: Formats journal data for OpenAI consumption
-- **Calendar Integration**: Prepares data for Google Calendar scheduling
-- **Content Organization**: Categorizes entries by sections (Built Today, Goals, etc.)
+- **Multi-date Support**: Process any date range and create events for future dates
+- **Central Time Zone**: Configured for America/Chicago timezone
+- **Secure OAuth2**: Protected credential management with comprehensive .gitignore
 
 ## Quick Start
 
