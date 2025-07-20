@@ -83,13 +83,20 @@ sys.path.insert(0, os.path.join('$SCRIPT_DIR', 'src'))
 try:
     from pipeline import JournalAIPipeline
     
-    yesterday = (date.today() - timedelta(days=1)).isoformat()
+    today = date.today().isoformat()
+    tomorrow = (date.today() + timedelta(days=1)).isoformat()
     
     # Initialize pipeline
     pipeline = JournalAIPipeline()
     
-    # Run full pipeline using yesterday's data for today's calendar
-    result = pipeline.run_full_pipeline(yesterday, 'daily_planning')
+    # Run full pipeline using today's data for tomorrow's calendar
+    result = pipeline.run_full_pipeline(today, 'daily_planning')
+    
+    # Override calendar creation to target tomorrow
+    if result.get('status') != 'error':
+        ai_response = result.get('ai_response', {})
+        calendar_result = pipeline.create_calendar_events(ai_response, tomorrow)
+        result['calendar_result'] = calendar_result
     
     if result.get('status') == 'error':
         print(f'PIPELINE_ERROR: {result.get(\"message\")}')
