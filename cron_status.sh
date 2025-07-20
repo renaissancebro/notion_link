@@ -67,7 +67,7 @@ fi
 # Check cron job status
 echo ""
 echo "⚙️ Cron Job Status:"
-echo "-" * 30
+echo "------------------------------"
 if crontab -l 2>/dev/null | grep -q "cron_daily_run.sh"; then
     echo "✅ Cron job is installed"
     echo "📋 Current cron entry:"
