@@ -19,7 +19,7 @@ fi
 
 # Show recent daily logs
 echo "📅 Recent Daily Runs:"
-echo "-" * 30
+echo "------------------------------"
 ls -la "$LOG_DIR"/cron_daily_*.log 2>/dev/null | tail -7 | while read line; do
     echo "  $line"
 done
