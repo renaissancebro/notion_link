@@ -1,6 +1,19 @@
+#!/usr/bin/env python3
+"""
+Legacy main.py - Use run.py for the new clean interface
+
+This file provides backward compatibility for existing commands.
+For new usage, use: python run.py
+"""
+
 import datetime
 import sys
-from notion_fetcher import (
+import os
+
+# Add src to Python path for new structure
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+from notion.fetcher import (
     query_database_by_date,
     get_entries_for_date,
     get_page_content,
@@ -12,6 +25,9 @@ from notion_fetcher import (
     search_for_entries_with_content,
 )
 from datetime import date
+
+print("⚠️  Note: main.py is legacy. Use 'python run.py' for the new clean interface!")
+print("   Run 'python run.py help' for usage options\n")
 
 
 def display_entry(entry):
