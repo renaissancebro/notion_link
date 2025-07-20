@@ -34,9 +34,9 @@ crontab -e
 ## 📊 Test Results
 
 **✅ Successfully Tested**:
-- Extracted yesterday's "Builder's edge" journal
-- AI processed with 1169 tokens
-- Created 3 calendar events:
+- Extracted today's "Builder's edge" journal
+- AI processed with 1169 tokens  
+- Created 3 calendar events for tomorrow:
   - Deep Work: Postman Setup  
   - Debugging Tools Creation
   - Adding Personal Content in Journal
