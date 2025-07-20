@@ -258,6 +258,8 @@ if __name__ == "__main__":
         print("Usage:")
         print("  python main.py                    - Show all recent entries + today's entries")
         print("  python main.py edited             - Find and show all edited entries")
+        print("  python main.py debug              - Debug block content (prompts for page ID)")
+        print("  python main.py recent             - Show entries by creation time (for date mismatches)")
         print("  python main.py YYYY-MM-DD         - Show entries for specific date")
         print("  python main.py [page_id]          - Show specific entry by ID")
 
