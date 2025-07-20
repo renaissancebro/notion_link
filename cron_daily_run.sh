@@ -78,7 +78,7 @@ import os
 from datetime import date, timedelta
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join('$SCRIPT_DIR', 'src'))
 
 try:
     from pipeline import JournalAIPipeline
