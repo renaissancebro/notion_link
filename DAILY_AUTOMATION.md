@@ -23,9 +23,9 @@ Your Journal AI Pipeline now has **complete daily automation** ready to set up!
 # 1. Test the script
 ./cron_daily_run.sh
 
-# 2. Install daily automation  
+# 2. Install evening automation  
 crontab -e
-# Add: 0 7 * * * /Users/joshuafreeman/Desktop/agent_projects/agents/planning_agent/cron_daily_run.sh
+# Add: 0 19 * * * /Users/joshuafreeman/Desktop/agent_projects/agents/planning_agent/cron_daily_run.sh
 
 # 3. Monitor status
 ./cron_status.sh
