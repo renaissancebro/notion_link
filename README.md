@@ -16,22 +16,21 @@ A Python-based system that extracts journal entries from Notion, processes them 
    ```bash
    pip install -r requirements.txt
    cp .env.sample .env
-   # Add your NOTION_TOKEN and DATABASE_ID to .env
+   # Add your API keys to .env (see .env.sample for format)
    ```
 
    ⚠️ **Security Note**: Never commit your `.env` file to git - it contains sensitive API keys!
 
 2. **Test the System**:
    ```bash
-   python test_components.py    # Full test suite
-   python print_content.py      # View extracted content
+   python run.py test          # Test all components
+   python run.py extract       # View extracted content
    ```
 
-3. **View Journal Content**:
+3. **Run the Pipeline**:
    ```bash
-   python print_content.py today       # Today's entries
-   python print_content.py 2025-07-19  # Specific date
-   python main.py search               # Find all entries with content
+   python run.py               # Full AI pipeline for today
+   python run.py help          # Show all usage options
    ```
 
 ## Core Components
