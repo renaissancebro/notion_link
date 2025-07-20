@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_DIR="$SCRIPT_DIR/logs"
 
 echo "📊 Journal AI Pipeline - Cron Status"
-echo "=" * 50
+echo "======================================================"
 
 # Check if logs directory exists
 if [ ! -d "$LOG_DIR" ]; then
