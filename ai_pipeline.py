@@ -22,7 +22,11 @@ class AIPipeline:
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         if not self.openai_api_key:
             print("⚠️ Warning: OPENAI_API_KEY not found in .env file")
-        # You'll add Google Calendar client here
+        
+        # Initialize Google Calendar integration
+        self.calendar = GoogleCalendarIntegration()
+        if not self.calendar.is_available():
+            print("⚠️ Warning: Google Calendar integration not available")
     
     def extract_journal_data(self, target_date=None, include_recent=True):
         """Step 1: Extract journal data from Notion"""
