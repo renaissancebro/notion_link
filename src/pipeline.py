@@ -9,7 +9,7 @@ from datetime import date, datetime
 
 from notion.extractor import JournalExtractor
 from ai.processor import AIProcessor, PromptGenerator
-from calendar.integration import GoogleCalendarIntegration
+from calendar_api.integration import GoogleCalendarIntegration
 
 
 class JournalAIPipeline:
