@@ -62,14 +62,14 @@ if [ ! -f "credentials.json" ]; then
 fi
 
 # Run the daily pipeline
-# Strategy: Use yesterday's journal to plan today's calendar events
-log "Running daily pipeline: yesterday's journal → today's calendar"
+# Strategy: Use today's journal to plan tomorrow's calendar events
+log "Running evening pipeline: today's journal → tomorrow's calendar"
 
 # Calculate dates
-yesterday=$(date -v-1d +%Y-%m-%d 2>/dev/null || date -d "yesterday" +%Y-%m-%d)
 today=$(date +%Y-%m-%d)
+tomorrow=$(date -v+1d +%Y-%m-%d 2>/dev/null || date -d "tomorrow" +%Y-%m-%d)
 
-log "Processing journal from $yesterday to create events for $today"
+log "Processing journal from $today to create events for $tomorrow"
 
 # Run the pipeline with error handling
 python_output=$(python -c "
