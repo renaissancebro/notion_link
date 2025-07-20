@@ -60,7 +60,7 @@ error_log="$LOG_DIR/cron_errors.log"
 if [ -f "$error_log" ] && [ -s "$error_log" ]; then
     echo ""
     echo "🚨 Recent Errors:"
-    echo "-" * 30
+    echo "------------------------------"
     tail -n 5 "$error_log"
 fi
 
