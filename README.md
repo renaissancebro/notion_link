@@ -76,19 +76,26 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Usage Examples
 
-```python
-# Extract today's journal for AI
-from journal_extractor import get_today_journal_for_ai
-data = get_today_journal_for_ai()
+**Command Line:**
+```bash
+python run.py                         # Today's full pipeline
+python run.py run 2025-07-19         # Specific date
+python run.py run today reflection   # Different AI task type
+python run.py extract yesterday      # Extract data only
+```
 
-# Run full pipeline
-from ai_pipeline import AIPipeline
-pipeline = AIPipeline()
+**Python API:**
+```python
+# New clean interface
+from src.pipeline import JournalAIPipeline
+
+pipeline = JournalAIPipeline()
 result = pipeline.run_full_pipeline()
 
-# Get calendar planning data
-from journal_extractor import get_calendar_planning_data
-calendar_data = get_calendar_planning_data(days=7)
+# Individual components
+from src.notion.extractor import JournalExtractor
+extractor = JournalExtractor()
+data = extractor.get_journal_entry()
 ```
 
 ## Next Steps
