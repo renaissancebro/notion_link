@@ -144,6 +144,97 @@ def find_edited_entries():
         return []
 
 
+def debug_block_content(page_id):
+    """
+    Debug function to examine raw block data and look for changes.
+    """
+    try:
+        print(f"=== DEBUGGING BLOCK CONTENT FOR {page_id} ===")
+        
+        # Get page details
+        page = notion.pages.retrieve(page_id=page_id)
+        print(f"Page created: {page.get('created_time')}")
+        print(f"Page last edited: {page.get('last_edited_time')}")
+        
+        # Get blocks
+        blocks = notion.blocks.children.list(block_id=page_id)
+        print(f"\nFound {len(blocks.get('results', []))} blocks")
+        
+        # Examine each block for content
+        for i, block in enumerate(blocks.get("results", [])):
+            print(f"\n--- Block {i+1} ---")
+            print(f"Type: {block.get('type')}")
+            print(f"ID: {block.get('id')}")
+            print(f"Created: {block.get('created_time')}")
+            print(f"Last edited: {block.get('last_edited_time')}")
+            
+            block_type = block.get("type")
+            if block_type and block_type in block:
+                block_data = block[block_type]
+                if "rich_text" in block_data:
+                    texts = block_data["rich_text"]
+                    content = "".join([t.get("plain_text", "") for t in texts])
+                    print(f"Content: '{content}'")
+                    if content.strip():
+                        print(f"*** HAS CONTENT! ***")
+                else:
+                    print("No rich_text found")
+            
+            # Check if this block was edited after creation
+            if block.get("created_time") != block.get("last_edited_time"):
+                print(f"*** BLOCK WAS EDITED! ***")
+        
+        return blocks
+        
+    except APIResponseError as error:
+        print(f"Error debugging block content: {error}")
+        return None
+
+
+def find_recent_entries_by_creation():
+    """
+    Find entries by creation time instead of date property (for late entries).
+    """
+    try:
+        # Get entries sorted by creation time instead of date property
+        response = notion.databases.query(
+            database_id=DATABASE_ID,
+            sorts=[
+                {
+                    "timestamp": "created_time",
+                    "direction": "descending"
+                }
+            ],
+            page_size=20
+        )
+        
+        recent_entries = []
+        if response and response.get("results"):
+            for entry in response["results"]:
+                date_prop = entry["properties"].get("Date", {}).get("date")
+                entry_date = date_prop.get("start") if date_prop else "No date"
+                journal_prop = entry["properties"].get("Journal", {})
+                if journal_prop.get("title"):
+                    title = journal_prop["title"][0].get("plain_text", "No title")
+                else:
+                    title = "No title"
+                
+                recent_entries.append({
+                    "id": entry["id"],
+                    "date_property": entry_date,
+                    "title": title,
+                    "created": entry.get("created_time"),
+                    "last_edited": entry.get("last_edited_time"),
+                    "entry": entry
+                })
+        
+        return recent_entries
+        
+    except APIResponseError as error:
+        print(f"Error finding recent entries by creation: {error}")
+        return []
+
+
 def get_entry_by_id(page_id):
     """
     Get a specific entry by its page ID.
