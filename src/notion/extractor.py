@@ -8,7 +8,7 @@ and Google Calendar integration.
 import datetime
 import json
 from datetime import date, timedelta
-from notion_fetcher import (
+from .fetcher import (
     get_entries_for_date,
     find_edited_entries,
     search_for_entries_with_content,
