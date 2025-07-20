@@ -29,7 +29,7 @@ latest_log=$(ls -t "$LOG_DIR"/cron_daily_*.log 2>/dev/null | head -1)
 if [ -n "$latest_log" ]; then
     echo ""
     echo "🔍 Latest Run Details:"
-    echo "-" * 30
+    echo "------------------------------"
     echo "📄 File: $(basename "$latest_log")"
     echo ""
     
