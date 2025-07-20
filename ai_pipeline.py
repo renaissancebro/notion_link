@@ -269,7 +269,7 @@ Focus on creating actionable, time-bounded events that align with the user's pri
         ai_response = self.process_with_openai(ai_prompt)
         
         # Step 4: Create calendar events
-        calendar_result = self.create_calendar_events(ai_response)
+        calendar_result = self.create_calendar_events(ai_response, target_date)
         
         print("="*50)
         print("✅ Pipeline complete!")
