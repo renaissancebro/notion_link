@@ -181,6 +181,45 @@ if __name__ == "__main__":
                 print("2. Edits were made to the title/properties only")
                 print("3. Edits haven't been saved properly in Notion")
             sys.exit(0)
+        
+        elif arg.lower() in ['debug', '--debug', '-d']:
+            print("Enter page ID to debug (or 'today' for today's entry):")
+            debug_target = input().strip()
+            
+            if debug_target.lower() == 'today':
+                if today_entries:
+                    debug_target = today_entries[0]['page_id']
+                    print(f"Using today's entry: {debug_target}")
+                else:
+                    print("No entries found for today")
+                    sys.exit(1)
+            
+            debug_block_content(debug_target)
+            sys.exit(0)
+        
+        elif arg.lower() in ['recent', '--recent', '-r']:
+            print("Showing entries by creation time (for late entries with changed dates)...")
+            print("="*60)
+            
+            recent_entries = find_recent_entries_by_creation()
+            if recent_entries:
+                print(f"Found {len(recent_entries)} recent entries by creation time:")
+                for i, entry in enumerate(recent_entries):
+                    print(f"\n{i+1}. Created: {entry['created']}")
+                    print(f"   Date Property: {entry['date_property']}")
+                    print(f"   Title: {entry['title']}")
+                    print(f"   ID: {entry['id']}")
+                    print(f"   Last edited: {entry['last_edited']}")
+                    
+                    # Show if date property doesn't match creation date
+                    created_date = entry['created'][:10]  # Extract YYYY-MM-DD
+                    date_prop = entry['date_property'][:10] if entry['date_property'] != "No date" else None
+                    if date_prop and created_date != date_prop:
+                        print(f"   *** DATE MISMATCH: Created {created_date}, Date Property {date_prop} ***")
+                    print("-" * 40)
+            else:
+                print("No recent entries found.")
+            sys.exit(0)
 
         # Check if it's a date (YYYY-MM-DD format) or page ID
         elif len(arg) == 10 and arg.count('-') == 2:
