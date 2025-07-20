@@ -113,11 +113,11 @@ class GoogleCalendarIntegration:
                 'description': description,
                 'start': {
                     'dateTime': start_dt.isoformat(),
-                    'timeZone': 'America/New_York',  # Adjust as needed
+                    'timeZone': 'America/Chicago',  # Central Time
                 },
                 'end': {
                     'dateTime': end_dt.isoformat(),
-                    'timeZone': 'America/New_York',
+                    'timeZone': 'America/Chicago',
                 },
             }
             
