@@ -27,8 +27,8 @@ ls -la logs/cron_daily_*.log
 # Open cron editor
 crontab -e
 
-# Add this line (runs daily at 7:00 AM Central Time)
-0 7 * * * /Users/joshuafreeman/Desktop/agent_projects/agents/planning_agent/cron_daily_run.sh
+# Add this line (runs daily at 7:00 PM Central Time)
+0 19 * * * /Users/joshuafreeman/Desktop/agent_projects/agents/planning_agent/cron_daily_run.sh
 
 # Save and exit (:wq in vim)
 ```
