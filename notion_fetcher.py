@@ -235,6 +235,96 @@ def find_recent_entries_by_creation():
         return []
 
 
+def search_for_entries_with_content():
+    """
+    Search through ALL entries to find any that have actual user content (not just template text).
+    """
+    try:
+        print("Searching through ALL entries for actual user content...")
+        
+        # Get ALL entries, not just recent ones
+        response = notion.databases.query(
+            database_id=DATABASE_ID,
+            sorts=[
+                {
+                    "timestamp": "created_time", 
+                    "direction": "descending"
+                }
+            ],
+            page_size=100  # Get up to 100 entries
+        )
+        
+        entries_with_content = []
+        template_keywords = [
+            "Notion Template", "Daily Founder Frame", "Entrepreneur Identity Tracker",
+            "Entrepreneurial Creed", "Time to Ship", "What Did I Build Today",
+            "technical rep", "Name your enemy", "Dangerous Entrepreneur"
+        ]
+        
+        if response and response.get("results"):
+            print(f"Checking {len(response['results'])} total entries...")
+            
+            for i, entry in enumerate(response["results"]):
+                print(f"Checking entry {i+1}/{len(response['results'])}: {entry['id']}")
+                
+                # Get the blocks for this entry
+                try:
+                    blocks = notion.blocks.children.list(block_id=entry["id"])
+                    
+                    has_user_content = False
+                    user_content_blocks = []
+                    
+                    for block in blocks.get("results", []):
+                        block_type = block.get("type")
+                        if block_type and block_type in block:
+                            block_data = block[block_type]
+                            if "rich_text" in block_data:
+                                texts = block_data["rich_text"]
+                                content = "".join([t.get("plain_text", "") for t in texts])
+                                
+                                # Check if this content is user-generated (not template)
+                                if content.strip():
+                                    is_template = any(keyword.lower() in content.lower() for keyword in template_keywords)
+                                    if not is_template and len(content.strip()) > 5:
+                                        has_user_content = True
+                                        user_content_blocks.append({
+                                            "type": block_type,
+                                            "content": content.strip(),
+                                            "created": block.get("created_time"),
+                                            "last_edited": block.get("last_edited_time")
+                                        })
+                    
+                    if has_user_content:
+                        date_prop = entry["properties"].get("Date", {}).get("date")
+                        entry_date = date_prop.get("start") if date_prop else "No date"
+                        journal_prop = entry["properties"].get("Journal", {})
+                        if journal_prop.get("title"):
+                            title = journal_prop["title"][0].get("plain_text", "No title")
+                        else:
+                            title = "No title"
+                        
+                        entries_with_content.append({
+                            "id": entry["id"],
+                            "date": entry_date,
+                            "title": title,
+                            "created": entry.get("created_time"),
+                            "last_edited": entry.get("last_edited_time"),
+                            "user_content_blocks": user_content_blocks,
+                            "entry": entry
+                        })
+                        print(f"*** FOUND ENTRY WITH USER CONTENT! {entry['id']} ***")
+                    
+                except Exception as block_error:
+                    print(f"Error checking blocks for entry {entry['id']}: {block_error}")
+                    continue
+        
+        return entries_with_content
+        
+    except APIResponseError as error:
+        print(f"Error searching for entries with content: {error}")
+        return []
+
+
 def get_entry_by_id(page_id):
     """
     Get a specific entry by its page ID.
