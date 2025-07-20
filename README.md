@@ -69,6 +69,11 @@ NOTION_TOKEN=your_notion_integration_token
 DATABASE_ID=your_notion_database_id
 ```
 
+**⚠️ SECURITY WARNING**: 
+- Copy `.env.sample` to `.env` and add your real tokens
+- Never commit `.env` to version control
+- The `.gitignore` file protects your credentials
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
