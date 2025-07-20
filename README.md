@@ -65,12 +65,21 @@ Create `.env` file with:
 ```
 NOTION_TOKEN=your_notion_integration_token
 DATABASE_ID=your_notion_database_id
+OPENAI_API_KEY=your_openai_api_key
+GOOGLE_CALENDAR_CREDENTIALS_FILE=credentials.json
 ```
 
+**🔒 SECURITY SETUP**:
+1. Download OAuth2 credentials from Google Cloud Console → Save as any filename
+2. Run `python setup_calendar.py` to automatically:
+   - Rename credentials to standard `credentials.json`
+   - Complete OAuth2 flow for calendar access
+   - Update `.env` with proper settings
+3. Your credentials are protected by comprehensive `.gitignore`
+
 **⚠️ SECURITY WARNING**: 
-- Copy `.env.sample` to `.env` and add your real tokens
-- Never commit `.env` to version control
-- The `.gitignore` file protects your credentials
+- Never commit `.env`, `credentials.json`, or `token.json` to version control
+- All sensitive files are automatically protected by `.gitignore`
 
 ## License
 
