@@ -39,6 +39,4 @@ except Exception as e:
     print(f"Connection failed: {e}")
 
 
-get_page_content = notion.pages.retrieve
-
-find_edited_entries() 
+# Test script for debugging Notion API 
