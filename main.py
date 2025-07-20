@@ -14,7 +14,7 @@ from datetime import date
 def display_entry(entry):
     """Helper function to display a journal entry"""
     print(f"Page ID: {entry['page_id']}")
-    
+
     # Show when the page was last edited
     if entry["content"] and entry["content"]["page_details"]:
         last_edited = entry["content"]["page_details"].get("last_edited_time")
@@ -144,12 +144,12 @@ if __name__ == "__main__":
     # Check if a specific page ID or date was provided as command line argument
     if len(sys.argv) > 1:
         arg = sys.argv[1]
-        
+
         # Check for special commands
         if arg.lower() in ['edited', '--edited', '-e']:
             print("Scanning for edited entries...")
             print("="*60)
-            
+
             edited_entries = find_edited_entries()
             if edited_entries:
                 print(f"Found {len(edited_entries)} edited entries:")
@@ -160,14 +160,14 @@ if __name__ == "__main__":
                     print(f"Created: {entry['created']}")
                     print(f"Last edited: {entry['last_edited']}")
                     print("-" * 40)
-                
+
                 # Show the most recently edited entry in detail
                 if edited_entries:
                     most_recent = edited_entries[0]  # They should be sorted by date
                     print(f"\n{'='*60}")
                     print(f"MOST RECENTLY EDITED ENTRY:")
                     print(f"{'='*60}")
-                    
+
                     # Get full entry details
                     full_entry = get_entry_by_id(most_recent['id'])
                     if full_entry:
@@ -179,7 +179,7 @@ if __name__ == "__main__":
                 print("2. Edits were made to the title/properties only")
                 print("3. Edits haven't been saved properly in Notion")
             sys.exit(0)
-        
+
         # Check if it's a date (YYYY-MM-DD format) or page ID
         elif len(arg) == 10 and arg.count('-') == 2:
             # It's a date
@@ -187,7 +187,7 @@ if __name__ == "__main__":
                 target_date = datetime.datetime.strptime(arg, '%Y-%m-%d').date()
                 print(f"Fetching entries for date: {target_date}")
                 print("="*60)
-                
+
                 date_entries = get_entries_for_date(target_date)
                 if date_entries:
                     for i, entry in enumerate(date_entries):
@@ -203,7 +203,7 @@ if __name__ == "__main__":
             page_id = arg
             print(f"Fetching specific entry with ID: {page_id}")
             print("="*60)
-            
+
             entry = get_entry_by_id(page_id)
             if entry:
                 print(f"\n=== Entry Details ===")
@@ -211,7 +211,7 @@ if __name__ == "__main__":
                 print("-" * 40)
             else:
                 print("Entry not found or error occurred.")
-    
+
     else:
         print(f"Fetching journal entries for today: {today}")
         print("Usage:")
@@ -219,7 +219,7 @@ if __name__ == "__main__":
         print("  python main.py edited             - Find and show all edited entries")
         print("  python main.py YYYY-MM-DD         - Show entries for specific date")
         print("  python main.py [page_id]          - Show specific entry by ID")
-        
+
         # First, let's see what entries are available in the database
         print("\n" + "="*60)
         print("CHECKING ALL RECENT ENTRIES IN DATABASE:")
@@ -235,7 +235,7 @@ if __name__ == "__main__":
                 else:
                     title = "No title"
                 print(f"{i+1}. Date: {entry_date} | Title: {title} | ID: {entry['id']}")
-        
+
         print("\n" + "="*60)
         print(f"NOW LOOKING FOR TODAY'S ENTRIES ({today}):")
         print("="*60)

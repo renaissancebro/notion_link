@@ -111,13 +111,13 @@ def find_edited_entries():
             ],
             page_size=50  # Check last 50 entries
         )
-        
+
         edited_entries = []
         if response and response.get("results"):
             for entry in response["results"]:
                 created_time = entry.get("created_time")
                 last_edited_time = entry.get("last_edited_time")
-                
+
                 # Check if the entry has been edited after creation
                 if created_time != last_edited_time:
                     date_prop = entry["properties"].get("Date", {}).get("date")
@@ -127,7 +127,7 @@ def find_edited_entries():
                         title = journal_prop["title"][0].get("plain_text", "No title")
                     else:
                         title = "No title"
-                    
+
                     edited_entries.append({
                         "id": entry["id"],
                         "date": entry_date,
@@ -136,9 +136,9 @@ def find_edited_entries():
                         "last_edited": last_edited_time,
                         "entry": entry
                     })
-        
+
         return edited_entries
-        
+
     except APIResponseError as error:
         print(f"Error finding edited entries: {error}")
         return []
@@ -150,14 +150,14 @@ def get_entry_by_id(page_id):
     """
     try:
         print(f"Fetching entry with ID: {page_id}")
-        
+
         # Get page details
         page = notion.pages.retrieve(page_id=page_id)
         print(f"Page last edited: {page.get('last_edited_time')}")
-        
+
         # Get page content
         page_content = get_page_content(page_id)
-        
+
         if page_content:
             return {
                 "page_id": page_id,
@@ -165,7 +165,7 @@ def get_entry_by_id(page_id):
                 "content": page_content,
             }
         return None
-        
+
     except APIResponseError as error:
         print(f"Error retrieving entry by ID: {error}")
         return None
@@ -177,7 +177,7 @@ def get_page_content(page_id):
     """
     try:
         print(f"Fetching fresh content for page: {page_id}")
-        
+
         # Get page details (this will show last_edited_time)
         page = notion.pages.retrieve(page_id=page_id)
         print(f"Page last edited: {page.get('last_edited_time')}")
@@ -237,6 +237,9 @@ if __name__ == "__main__":
     print(f"Found {len(yesterday_entries)} entries for yesterday")
 
     # Print details if entries found
+
+
+
     if yesterday_entries:
         for i, entry in enumerate(yesterday_entries):
             print(f"\nEntry {i + 1}:")
