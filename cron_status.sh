@@ -48,7 +48,7 @@ if [ -n "$latest_log" ]; then
     
     echo ""
     echo "📝 Latest Log Entries (last 10 lines):"
-    echo "-" * 30
+    echo "------------------------------"
     tail -n 10 "$latest_log"
 else
     echo ""
