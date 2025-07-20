@@ -221,6 +221,48 @@ if __name__ == "__main__":
             else:
                 print("No recent entries found.")
             sys.exit(0)
+        
+        elif arg.lower() in ['search', '--search', '-s']:
+            print("Searching ALL entries for actual user content (not just templates)...")
+            print("This may take a while as it checks every entry...")
+            print("="*60)
+            
+            entries_with_content = search_for_entries_with_content()
+            if entries_with_content:
+                print(f"\n*** FOUND {len(entries_with_content)} ENTRIES WITH ACTUAL CONTENT! ***")
+                print("="*60)
+                
+                for i, entry in enumerate(entries_with_content):
+                    print(f"\n{i+1}. Date: {entry['date']}")
+                    print(f"   Title: {entry['title']}")
+                    print(f"   ID: {entry['id']}")
+                    print(f"   Created: {entry['created']}")
+                    print(f"   Last edited: {entry['last_edited']}")
+                    print(f"   User content blocks found: {len(entry['user_content_blocks'])}")
+                    
+                    print("   Content preview:")
+                    for j, block in enumerate(entry['user_content_blocks'][:3]):  # Show first 3 blocks
+                        preview = block['content'][:100] + "..." if len(block['content']) > 100 else block['content']
+                        print(f"     {j+1}. {block['type']}: '{preview}'")
+                    
+                    if len(entry['user_content_blocks']) > 3:
+                        print(f"     ... and {len(entry['user_content_blocks']) - 3} more blocks")
+                    print("-" * 40)
+                
+                # Show the most recent entry with content in detail
+                print(f"\n{'='*60}")
+                print(f"MOST RECENT ENTRY WITH CONTENT:")
+                print(f"{'='*60}")
+                
+                most_recent = entries_with_content[0]
+                full_entry = get_entry_by_id(most_recent['id'])
+                if full_entry:
+                    display_entry(full_entry)
+                    
+            else:
+                print("No entries found with actual user content.")
+                print("All entries appear to contain only template text.")
+            sys.exit(0)
 
         # Check if it's a date (YYYY-MM-DD format) or page ID
         elif len(arg) == 10 and arg.count('-') == 2:
