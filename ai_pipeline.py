@@ -8,6 +8,7 @@ import json
 import os
 from datetime import date, datetime, timedelta
 from journal_extractor import JournalExtractor, get_today_journal_for_ai, get_calendar_planning_data
+from google_calendar import GoogleCalendarIntegration
 from dotenv import load_dotenv
 
 load_dotenv()
