@@ -215,33 +215,43 @@ Focus on creating actionable, time-bounded events that align with the user's pri
                 "prompt_length": len(prompt)
             }
     
-    def create_calendar_events(self, ai_response):
-        """Step 4: Create Google Calendar events (placeholder)"""
+    def create_calendar_events(self, ai_response, target_date=None):
+        """Step 4: Create Google Calendar events"""
         print("📅 Creating Google Calendar events...")
         
-        # This is where you'll add Google Calendar integration
-        # Example structure:
-        """
-        from google.oauth2.credentials import Credentials
-        from googleapiclient.discovery import build
-        
-        service = build('calendar', 'v3', credentials=creds)
-        
-        for event_data in ai_response['calendar_events']:
-            event = {
-                'summary': event_data['title'],
-                'start': {'dateTime': f"2025-07-20T{event_data['start_time']}:00"},
-                'end': {'dateTime': f"2025-07-20T{event_data['end_time']}:00"},
-                'description': event_data['description']
+        if not self.calendar.is_available():
+            return {
+                "status": "error",
+                "message": "Google Calendar integration not available",
+                "events_created": 0
             }
-            
-            service.events().insert(calendarId='primary', body=event).execute()
-        """
+        
+        # Determine target date
+        if target_date:
+            if isinstance(target_date, str):
+                date_str = target_date
+            else:
+                date_str = target_date.isoformat()
+        else:
+            date_str = date.today().isoformat()
+        
+        # Create events from AI response
+        result = self.calendar.create_events_from_ai_response(ai_response, date_str)
+        
+        if 'error' in result:
+            return {
+                "status": "error",
+                "message": result['error'],
+                "events_created": 0
+            }
         
         return {
-            "status": "placeholder", 
-            "message": "Google Calendar integration not yet implemented",
-            "events_ready": True
+            "status": "success",
+            "events_created": result['events_created'],
+            "events": result['events'],
+            "errors": result['errors'],
+            "total_attempted": result['total_attempted'],
+            "date": date_str
         }
     
     def run_full_pipeline(self, target_date=None, task_type="daily_planning"):
