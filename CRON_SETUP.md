@@ -182,12 +182,12 @@ Run different configurations:
 
 **Example Output**:
 ```
-[2025-07-21 07:00:01 CT] Starting Daily Journal AI Pipeline
-[2025-07-21 07:00:15 CT] ✅ Pipeline completed successfully: 4 events created, 1247 tokens used
-[2025-07-21 07:00:15 CT] 📅 EVENT_1: Deep Work: Notion Integration at 2025-07-21T09:00:00
-[2025-07-21 07:00:15 CT] 📅 EVENT_2: Code Review Session at 2025-07-21T11:00:00
-[2025-07-21 07:00:15 CT] 📅 EVENT_3: Lunch Break at 2025-07-21T12:00:00
-[2025-07-21 07:00:15 CT] 📅 EVENT_4: Documentation Update at 2025-07-21T14:00:00
+[2025-07-21 19:00:01 CT] Starting Daily Journal AI Pipeline
+[2025-07-21 19:00:15 CT] ✅ Pipeline completed successfully: 4 events created, 1247 tokens used
+[2025-07-21 19:00:15 CT] 📅 EVENT_1: Deep Work: Notion Integration at 2025-07-22T09:00:00
+[2025-07-21 19:00:15 CT] 📅 EVENT_2: Code Review Session at 2025-07-22T11:00:00
+[2025-07-21 19:00:15 CT] 📅 EVENT_3: Lunch Break at 2025-07-22T12:00:00
+[2025-07-21 19:00:15 CT] 📅 EVENT_4: Documentation Update at 2025-07-22T14:00:00
 ```
 
-Your calendar will be automatically populated each morning with AI-generated, insight-driven time blocks!
+Your calendar will be automatically populated each evening with tomorrow's AI-generated, insight-driven time blocks!
