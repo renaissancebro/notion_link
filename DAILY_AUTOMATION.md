@@ -4,10 +4,10 @@ Your Journal AI Pipeline now has **complete daily automation** ready to set up!
 
 ## 🎯 What You Get
 
-**Every Day at 7:00 AM Central**:
-1. 📖 Extracts yesterday's journal entries from Notion
+**Every Evening at 7:00 PM Central**:
+1. 📖 Extracts today's journal entries from Notion
 2. 🤖 AI analyzes your reflections and progress  
-3. 📅 Creates 3-5 time-blocked calendar events for today
+3. 📅 Creates 3-5 time-blocked calendar events for tomorrow
 4. 📋 Logs everything for monitoring
 
 ## 🚀 Ready-to-Use Files
