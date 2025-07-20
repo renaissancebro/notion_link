@@ -36,12 +36,12 @@ class AIProcessor:
             }
         
         try:
-            import openai
+            from openai import OpenAI
             
-            # Set the API key
-            openai.api_key = self.api_key
+            # Initialize OpenAI client
+            client = OpenAI(api_key=self.api_key)
             
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are a productivity AI assistant helping entrepreneurs plan their day based on journal entries. Always respond with structured, actionable advice."},
