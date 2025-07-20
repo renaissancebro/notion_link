@@ -15,9 +15,11 @@ A Python-based system that extracts journal entries from Notion, processes them 
 1. **Setup Environment**:
    ```bash
    pip install -r requirements.txt
-   cp .env.example .env
+   cp .env.sample .env
    # Add your NOTION_TOKEN and DATABASE_ID to .env
    ```
+
+   ⚠️ **Security Note**: Never commit your `.env` file to git - it contains sensitive API keys!
 
 2. **Test the System**:
    ```bash
