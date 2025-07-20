@@ -45,17 +45,17 @@ crontab -l
 ## ⏰ Cron Schedule Options
 
 ```bash
-# Daily at 7:00 AM
-0 7 * * *
+# Daily at 7:00 PM (recommended)
+0 19 * * *
 
-# Daily at 8:30 AM
-30 8 * * *
+# Daily at 8:00 PM
+0 20 * * *
 
-# Weekdays only at 7:00 AM
-0 7 * * 1-5
+# Weekdays only at 7:00 PM
+0 19 * * 1-5
 
-# Twice daily (morning planning + evening review)
-0 7,18 * * *
+# Twice daily (lunch planning + evening review)
+0 12,19 * * *
 ```
 
 ## 📊 Monitoring & Logs
