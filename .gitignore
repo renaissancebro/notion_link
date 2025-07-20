@@ -6,6 +6,10 @@
 token.json
 credentials.json
 service-account.json
+client_secret*.json
+client_secret_*.json
+*client_secret*.json
+oauth2_credentials.json
 
 # Python
 __pycache__/
