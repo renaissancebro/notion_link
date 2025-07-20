@@ -65,4 +65,4 @@ crontab -e
 - `goal_setting` 
 - `calendar_optimization`
 
-Your journal reflections will now automatically become actionable daily schedules! 🎉
+Your evening journal reflections will now automatically become tomorrow's actionable schedules! 🎉
