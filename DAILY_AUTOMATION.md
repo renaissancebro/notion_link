@@ -54,10 +54,10 @@ crontab -e
 ## 🎛️ Customization Options
 
 **Schedule Changes**:
-- `0 7 * * *` - Daily 7 AM
-- `30 8 * * *` - Daily 8:30 AM  
-- `0 7 * * 1-5` - Weekdays only
-- `0 7,18 * * *` - Morning + evening
+- `0 19 * * *` - Daily 7 PM (recommended)
+- `0 20 * * *` - Daily 8 PM  
+- `0 19 * * 1-5` - Weekdays only
+- `0 12,19 * * *` - Lunch + evening
 
 **Task Types**:
 - `daily_planning` (default)
