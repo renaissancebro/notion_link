@@ -75,7 +75,7 @@ if crontab -l 2>/dev/null | grep -q "cron_daily_run.sh"; then
 else
     echo "❌ Cron job not found"
     echo "💡 Run: crontab -e"
-    echo "💡 Add: 0 7 * * * $SCRIPT_DIR/cron_daily_run.sh"
+    echo "💡 Add: 0 19 * * * $SCRIPT_DIR/cron_daily_run.sh"
 fi
 
 echo ""
