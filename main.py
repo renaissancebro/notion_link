@@ -9,6 +9,7 @@ from notion_fetcher import (
     find_edited_entries,
     debug_block_content,
     find_recent_entries_by_creation,
+    search_for_entries_with_content,
 )
 from datetime import date
 
