@@ -8,7 +8,7 @@
 # 3. Creates calendar events for today
 #
 # Usage: ./cron_daily_run.sh
-# Cron: 0 7 * * * /path/to/cron_daily_run.sh
+# Cron: 0 19 * * * /path/to/cron_daily_run.sh
 #
 
 # Set script directory and change to it
