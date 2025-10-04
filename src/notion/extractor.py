@@ -279,25 +279,27 @@ class JournalExtractor:
             target_date = date.today()
         elif isinstance(target_date, str):
             target_date = datetime.datetime.strptime(target_date, '%Y-%m-%d').date()
-        
+
         entries = get_entries_for_date(target_date)
-        
+
         if not entries:
             return {
                 "date": target_date.isoformat(),
                 "found": False,
                 "content": {},
+                "explicit_plan": [],
                 "raw_data": None
             }
-        
+
         entry = entries[0]  # Take first entry for the date
-        
-        # Extract user content
+
+        # Extract user content and explicit plan
+        user_content = {}
+        explicit_plan = []
         if entry["content"] and entry["content"]["content_blocks"]:
             user_content = self.extract_user_content_from_blocks(entry["content"]["content_blocks"])
-        else:
-            user_content = {}
-        
+            explicit_plan = self.extract_explicit_plan(entry["content"]["content_blocks"])
+
         return {
             "date": target_date.isoformat(),
             "found": True,
@@ -305,7 +307,9 @@ class JournalExtractor:
             "created": entry["content"]["page_details"].get("created_time") if entry["content"] else None,
             "last_edited": entry["content"]["page_details"].get("last_edited_time") if entry["content"] else None,
             "content": user_content,
+            "explicit_plan": explicit_plan,
             "has_user_content": len(user_content) > 0,
+            "has_explicit_plan": len(explicit_plan) > 0,
             "raw_data": entry
         }
     
