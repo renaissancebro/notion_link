@@ -29,7 +29,8 @@ class JournalExtractor:
         ]
         # New: Keywords that indicate planning sections
         self.planning_section_keywords = [
-            "tomorrow", "next day", "plan for", "schedule", "to do", "tasks for"
+            "tomorrow", "next day", "plan for", "schedule", "to do", "tasks for",
+            "build blocks", "tomorrow's system"
         ]
     
     def extract_user_content_from_blocks(self, blocks):
