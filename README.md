@@ -176,11 +176,17 @@ python run.py
 ## System Status
 
 ✅ **Fully Operational**:
-- Notion extraction working
-- OpenAI GPT-4 integration active  
-- Google Calendar gap-aware scheduling active
-- Central Time timezone configured
-- OAuth2 security implemented
-- Complete pipeline: Journal → AI → Calendar
+- Build Blocks format parsing ✅
+- Notion extraction working ✅
+- OpenAI GPT-4 integration active ✅
+- Google Calendar scheduling active ✅
+- Central Time timezone configured ✅
+- OAuth2 security implemented ✅
+- Complete pipeline: Journal → Calendar ✅
+
+## Documentation
+
+- **[YOUR_SETUP.md](YOUR_SETUP.md)** - Complete guide for Build Blocks format
+- **[EXPLICIT_PLAN_GUIDE.md](EXPLICIT_PLAN_GUIDE.md)** - General explicit planning documentation
 
 Built for entrepreneurs who want to transform their journal reflections into actionable daily planning.
