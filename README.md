@@ -4,13 +4,13 @@ A Python-based system that extracts journal entries from Notion and automaticall
 
 ## Features
 
+- **Build Blocks Scheduling**: Write tasks with durations (`Task 2 hours`) - system schedules them sequentially
+- **Flexible Time Formats**: Supports Build Blocks format, explicit times (9:00-10:30), or AI inference
 - **Notion Integration**: Extracts journal content from Notion databases with smart content filtering
-- **Explicit Plan Scheduling**: Write your daily plan with times at end of day - system schedules it directly to calendar
-- **AI Processing**: OpenAI GPT-4 analysis of journal entries for actionable insights (when explicit plan not provided)
 - **Google Calendar Integration**: Automatically creates time-blocked calendar events while respecting existing meetings
+- **AI Fallback**: If no explicit plan provided, AI analyzes journal and suggests schedule
 - **Smart Content Filtering**: Separates user-written content from template text
-- **Free-Window Scheduling**: Detects current calendar gaps and only proposes plan blocks that fit available windows
-- **Flexible Time Formats**: Supports 9:00-10:30, 2pm-4pm, 14:00 (1 hour), and more
+- **Conflict Detection**: Checks existing calendar and warns about scheduling conflicts
 - **Multi-date Support**: Process any date range and create events for future dates
 - **Central Time Zone**: Configured for America/Chicago timezone
 - **Secure OAuth2**: Protected credential management with comprehensive .gitignore
