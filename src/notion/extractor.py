@@ -7,6 +7,7 @@ and Google Calendar integration.
 
 import datetime
 import json
+import re
 from datetime import date, timedelta
 from .fetcher import (
     get_entries_for_date,
@@ -84,6 +85,73 @@ class JournalExtractor:
             })
         
         return user_content
+
+    def _infer_duration_minutes(self, text, default_minutes=60):
+        """Estimate duration from free-form text using simple heuristics."""
+        if not text:
+            return default_minutes
+
+        duration_pattern = re.search(r"(\d+(?:\.\d+)?)\s*(?:minutes?|mins?|m)\b", text, re.IGNORECASE)
+        if duration_pattern:
+            value = float(duration_pattern.group(1))
+            return max(int(value), 15)
+
+        hours_pattern = re.search(r"(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr|h)\b", text, re.IGNORECASE)
+        if hours_pattern:
+            value = float(hours_pattern.group(1))
+            return max(int(value * 60), 30)
+
+        pomodoro_pattern = re.search(r"(\d+)\s*(?:pomodoros?|pomos?)\b", text, re.IGNORECASE)
+        if pomodoro_pattern:
+            cycles = int(pomodoro_pattern.group(1))
+            return max(cycles * 25, 25)
+
+        return default_minutes
+
+    def _collect_action_items(self, entry):
+        """Extract actionable items with rough time estimates from a journal entry."""
+        if not entry.get("has_user_content", False):
+            return []
+
+        content = entry.get("content", {})
+        action_items = []
+
+        section_defaults = [
+            ("tomorrow_priority", "Tomorrow Priority", 60),
+            ("tomorrow_tool", "Technical Focus", 50),
+            ("improvements", "Daily Improvement", 40),
+            ("challenges", "Challenge Follow-up", 45),
+            ("built_today", "Momentum Follow-up", 40),
+            ("general", "General Note", 30),
+        ]
+
+        for section_key, label, default_minutes in section_defaults:
+            for block in content.get(section_key, []):
+                task_text = block.get("content", "").strip()
+                if not task_text:
+                    continue
+
+                estimate = self._infer_duration_minutes(task_text, default_minutes)
+
+                lowered = task_text.lower()
+                if "internship" in lowered or "apply" in lowered:
+                    estimate = min(estimate, 55)
+                elif "account" in lowered:
+                    estimate = min(estimate, 50)
+                elif "email" in lowered or "dm" in lowered:
+                    estimate = min(estimate, 35)
+
+                action_items.append({
+                    "title": task_text,
+                    "source": label,
+                    "raw_section_key": section_key,
+                    "estimated_minutes": estimate,
+                    "date": entry.get("date"),
+                    "created": block.get("created"),
+                    "last_edited": block.get("last_edited"),
+                })
+
+        return action_items
     
     def get_journal_entry(self, target_date=None):
         """Get structured journal entry for a specific date"""
@@ -200,13 +268,18 @@ class JournalExtractor:
                 "recurring_challenges": [],
                 "tomorrow_priorities": [],
                 "technical_focus_areas": [],
-                "improvement_patterns": []
+                "improvement_patterns": [],
+                "action_items": []
             }
-            
+
+            if journal_data:
+                planning_data["target_date"] = journal_data[0]["date"]
+                planning_data["dates_covered"] = [entry["date"] for entry in journal_data]
+
             for entry in journal_data:
                 if not entry["has_user_content"]:
                     continue
-                
+
                 content = entry["content"]
                 
                 # Extract accomplishments
@@ -232,12 +305,14 @@ class JournalExtractor:
                     planning_data["improvement_patterns"].extend([
                         f"{entry['date']}: {item['content']}" for item in content["improvements"]
                     ])
-            
+
+                planning_data["action_items"].extend(self._collect_action_items(entry))
+
             return planning_data
         else:
             # Single entry
             return self._extract_single_entry_for_calendar(journal_data)
-    
+
     def _extract_single_entry_for_calendar(self, entry):
         """Extract calendar-relevant data from a single entry"""
         if not entry.get("has_user_content", False):
@@ -252,7 +327,8 @@ class JournalExtractor:
             "tomorrow_priority": content.get("tomorrow_priority", []),
             "tomorrow_tool": content.get("tomorrow_tool", []),
             "challenges_to_address": content.get("challenges", []),
-            "improvement_areas": content.get("improvements", [])
+            "improvement_areas": content.get("improvements", []),
+            "action_items": self._collect_action_items(entry)
         }
 
 

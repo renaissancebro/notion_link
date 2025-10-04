@@ -7,9 +7,22 @@ Connects journal extraction -> OpenAI processing -> Google Calendar planning
 import json
 import os
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 from journal_extractor import JournalExtractor, get_today_journal_for_ai, get_calendar_planning_data
 from google_calendar import GoogleCalendarIntegration
 from dotenv import load_dotenv
+
+try:
+    from src.ai.processor import PromptGenerator
+except ModuleNotFoundError:  # Fallback when running legacy entry point
+    import sys
+    from pathlib import Path
+
+    base_dir = Path(__file__).resolve().parent
+    src_dir = base_dir / "src"
+    if src_dir.exists():
+        sys.path.insert(0, str(src_dir))
+    from ai.processor import PromptGenerator
 
 load_dotenv()
 
@@ -27,130 +40,152 @@ class AIPipeline:
         self.calendar = GoogleCalendarIntegration()
         if not self.calendar.is_available():
             print("⚠️ Warning: Google Calendar integration not available")
+        self._latest_planning_source = None
     
     def extract_journal_data(self, target_date=None, include_recent=True):
         """Step 1: Extract journal data from Notion"""
         print("🔍 Extracting journal data from Notion...")
-        
+        planning_source = None
+
         if target_date:
             # Get specific date
             journal_data = self.extractor.get_journal_entry(target_date)
             formatted_data = self.extractor.format_for_openai(journal_data)
+            planning_source = journal_data
         else:
             # Get today + recent context
             today_data = self.extractor.get_journal_entry()
             
             if include_recent:
                 recent_data = self.extractor.get_recent_entries(days=3)
+                planning_source = recent_data if recent_data else today_data
                 formatted_data = self.extractor.format_for_openai(recent_data)
             else:
                 formatted_data = self.extractor.format_for_openai(today_data)
-        
+                planning_source = today_data
+
         print(f"✅ Extracted journal data: {formatted_data.get('summary', 'Single entry')}")
+        self._latest_planning_source = planning_source
         return formatted_data
-    
-    def prepare_ai_prompt(self, journal_data, task_type="daily_planning"):
+
+    def build_planning_context(self, planning_source=None, plan_date=None):
+        """Construct structured planning context with existing calendar events."""
+        source = planning_source or self._latest_planning_source
+        if not source:
+            return {}
+
+        context = self.extractor.extract_for_calendar_planning(source)
+
+        plan_date_str = None
+        if plan_date:
+            if isinstance(plan_date, str):
+                plan_date_str = plan_date
+            else:
+                plan_date_str = plan_date.isoformat()
+        elif isinstance(source, dict) and source.get('date'):
+            plan_date_str = source['date']
+        elif isinstance(source, list) and source:
+            first = source[0]
+            if isinstance(first, dict) and first.get('date'):
+                plan_date_str = first['date']
+
+        tz = ZoneInfo(getattr(self.calendar, 'TIMEZONE', 'America/Chicago')) if self.calendar else None
+
+        if plan_date_str and self.calendar and self.calendar.is_available():
+            existing = self.calendar.list_events_for_date(plan_date_str)
+            if 'events' in existing:
+                normalized = []
+                busy_minutes = []
+                for event in existing['events']:
+                    start_time = self._extract_local_time(event.get('start'), tz)
+                    end_time = self._extract_local_time(event.get('end'), tz)
+                    normalized.append({
+                        'title': event.get('title', event.get('summary', 'Busy')),
+                        'start_time': start_time,
+                        'end_time': end_time
+                    })
+                    if start_time and end_time:
+                        busy_minutes.append((self._time_to_minutes(start_time), self._time_to_minutes(end_time)))
+                context['existing_calendar_events'] = normalized
+
+                free_windows = self._compute_free_windows(busy_minutes)
+                if free_windows:
+                    context['free_time_windows'] = free_windows
+
+        return context
+
+    def _extract_local_time(self, raw_value, tz):
+        if not raw_value or len(raw_value) <= 10:
+            return None
+        sanitized = raw_value.replace('Z', '+00:00')
+        try:
+            dt = datetime.fromisoformat(sanitized)
+        except ValueError:
+            return None
+        if dt.tzinfo and tz:
+            dt = dt.astimezone(tz)
+        elif tz and not dt.tzinfo:
+            dt = dt.replace(tzinfo=tz)
+        return dt.strftime('%H:%M')
+
+    def _time_to_minutes(self, time_str):
+        hours, minutes = map(int, time_str.split(':'))
+        return hours * 60 + minutes
+
+    def _minutes_to_time(self, minutes):
+        hours = minutes // 60
+        mins = minutes % 60
+        return f"{hours:02d}:{mins:02d}"
+
+    def _compute_free_windows(self, busy_minutes):
+        WORK_START = 8 * 60
+        WORK_END = 20 * 60
+        if not busy_minutes:
+            return [{
+                'time': f"{self._minutes_to_time(WORK_START)}-{self._minutes_to_time(WORK_END)}",
+                'duration_minutes': WORK_END - WORK_START
+            }]
+
+        merged = []
+        for start, end in sorted(busy_minutes):
+            if not merged or start > merged[-1][1]:
+                merged.append([start, end])
+            else:
+                merged[-1][1] = max(merged[-1][1], end)
+
+        free_windows = []
+        cursor = WORK_START
+        for start, end in merged:
+            if start > cursor:
+                free_windows.append({
+                    'time': f"{self._minutes_to_time(cursor)}-{self._minutes_to_time(min(start, WORK_END))}",
+                    'duration_minutes': max(0, min(start, WORK_END) - cursor)
+                })
+            cursor = max(cursor, end)
+        if cursor < WORK_END:
+            free_windows.append({
+                'time': f"{self._minutes_to_time(cursor)}-{self._minutes_to_time(WORK_END)}",
+                'duration_minutes': WORK_END - cursor
+            })
+
+        return [window for window in free_windows if window['duration_minutes'] > 0]
+
+    def prepare_ai_prompt(self, journal_data, task_type="daily_planning", planning_context=None):
         """Step 2: Prepare structured prompt for OpenAI"""
         print(f"📝 Preparing AI prompt for: {task_type}")
-        
+
+        if planning_context is None and task_type == "daily_planning":
+            planning_context = self.build_planning_context()
+
         prompts = {
-            "daily_planning": self._create_daily_planning_prompt(journal_data),
-            "reflection": self._create_reflection_prompt(journal_data),
-            "goal_setting": self._create_goal_setting_prompt(journal_data),
-            "calendar_optimization": self._create_calendar_prompt(journal_data)
+            "daily_planning": PromptGenerator.create_daily_planning_prompt(journal_data, planning_context),
+            "reflection": PromptGenerator.create_reflection_prompt(journal_data),
+            "goal_setting": PromptGenerator.create_goal_setting_prompt(journal_data),
+            "calendar_optimization": PromptGenerator.create_calendar_prompt(journal_data)
         }
-        
+
         return prompts.get(task_type, prompts["daily_planning"])
-    
-    def _create_daily_planning_prompt(self, journal_data):
-        """Create prompt for daily planning and task prioritization"""
-        base_prompt = """
-You are a productivity AI that helps entrepreneurs plan their day based on their journal entries.
 
-JOURNAL DATA:
-{journal_json}
-
-TASK:
-Based on this journal data, create a structured daily plan that includes:
-
-1. **Morning Priorities** (2-3 high-impact tasks)
-2. **Technical Focus** (specific tools/technologies to work on)
-3. **Time Blocks** (suggested time allocation)
-4. **Improvement Actions** (based on yesterday's reflections)
-5. **Calendar Events** (specific meetings/blocks to schedule)
-
-FORMAT YOUR RESPONSE AS JSON:
-{{
-  "morning_priorities": ["task1", "task2", "task3"],
-  "technical_focus": "specific technology or tool",
-  "time_blocks": [
-    {{"time": "9:00-11:00", "activity": "Deep work on X", "calendar_title": "Deep Work: X"}},
-    {{"time": "11:00-12:00", "activity": "Y", "calendar_title": "Y"}}
-  ],
-  "improvement_actions": ["action1", "action2"],
-  "calendar_events": [
-    {{"title": "Event Title", "start_time": "09:00", "duration_minutes": 120, "description": "Event description"}}
-  ],
-  "reasoning": "Brief explanation of planning decisions"
-}}
-"""
-        return base_prompt.format(journal_json=json.dumps(journal_data, indent=2))
-    
-    def _create_reflection_prompt(self, journal_data):
-        """Create prompt for reflection and insights"""
-        return f"""
-Analyze this entrepreneur's journal entries and provide insights on:
-1. Progress patterns
-2. Recurring challenges  
-3. Growth opportunities
-4. Productivity recommendations
-
-JOURNAL DATA:
-{json.dumps(journal_data, indent=2)}
-
-Provide actionable insights in structured format.
-"""
-    
-    def _create_goal_setting_prompt(self, journal_data):
-        """Create prompt for goal setting and strategic planning"""
-        return f"""
-Based on this journal data, suggest:
-1. Weekly goals
-2. Monthly objectives
-3. Skill development priorities
-4. Strategic focus areas
-
-JOURNAL DATA:
-{json.dumps(journal_data, indent=2)}
-
-Format as actionable goals with timelines.
-"""
-    
-    def _create_calendar_prompt(self, journal_data):
-        """Create prompt specifically for calendar event generation"""
-        calendar_data = self.extractor.extract_for_calendar_planning(journal_data)
-        
-        return f"""
-Create specific calendar events based on this planning data:
-
-PLANNING DATA:
-{json.dumps(calendar_data, indent=2)}
-
-Return a JSON array of calendar events:
-[
-  {{
-    "title": "Event Title",
-    "start_time": "09:00",
-    "end_time": "10:30", 
-    "date": "2025-07-20",
-    "description": "Detailed description",
-    "event_type": "focus_time|meeting|review|planning"
-  }}
-]
-
-Focus on creating actionable, time-bounded events that align with the user's priorities.
-"""
-    
     def process_with_openai(self, prompt):
         """Step 3: Send to OpenAI"""
         print("🤖 Processing with OpenAI...")
@@ -215,7 +250,7 @@ Focus on creating actionable, time-bounded events that align with the user's pri
                 "prompt_length": len(prompt)
             }
     
-    def create_calendar_events(self, ai_response, target_date=None):
+    def create_calendar_events(self, ai_response, target_date=None, planning_context=None):
         """Step 4: Create Google Calendar events"""
         print("📅 Creating Google Calendar events...")
         
@@ -236,21 +271,24 @@ Focus on creating actionable, time-bounded events that align with the user's pri
             date_str = date.today().isoformat()
         
         # Create events from AI response
-        result = self.calendar.create_events_from_ai_response(ai_response, date_str)
+        result = self.calendar.create_events_from_ai_response(ai_response, date_str, planning_context)
         
         if 'error' in result:
             return {
                 "status": "error",
                 "message": result['error'],
-                "events_created": 0
+                "events_created": 0,
+                "details": result.get('details')
             }
-        
+
         return {
             "status": "success",
             "events_created": result['events_created'],
             "events": result['events'],
             "errors": result['errors'],
             "total_attempted": result['total_attempted'],
+            "validation_warnings": result.get('validation_warnings', []),
+            "unscheduled_action_items": result.get('unscheduled_action_items', []),
             "date": date_str
         }
     
@@ -261,21 +299,27 @@ Focus on creating actionable, time-bounded events that align with the user's pri
         
         # Step 1: Extract journal data
         journal_data = self.extract_journal_data(target_date)
+        if target_date:
+            plan_date = target_date if isinstance(target_date, str) else target_date.isoformat()
+        else:
+            plan_date = date.today().isoformat()
+        planning_context = self.build_planning_context(plan_date=plan_date)
         
         # Step 2: Prepare AI prompt
-        ai_prompt = self.prepare_ai_prompt(journal_data, task_type)
+        ai_prompt = self.prepare_ai_prompt(journal_data, task_type, planning_context)
         
         # Step 3: Process with OpenAI
         ai_response = self.process_with_openai(ai_prompt)
         
         # Step 4: Create calendar events
-        calendar_result = self.create_calendar_events(ai_response, target_date)
+        calendar_result = self.create_calendar_events(ai_response, target_date, planning_context)
         
         print("="*50)
         print("✅ Pipeline complete!")
         
         return {
             "journal_data": journal_data,
+            "planning_context": planning_context,
             "ai_prompt": ai_prompt,
             "ai_response": ai_response,
             "calendar_result": calendar_result,

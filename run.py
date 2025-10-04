@@ -192,7 +192,9 @@ def run_pipeline(target_date=None, task_type="daily_planning"):
                 
         else:
             print(f"❌ Calendar Events: {calendar_result.get('message', 'Failed')}")
-        
+            if calendar_result.get('details'):
+                print(f"   Details: {calendar_result['details']}")
+
         print(f"\n🕒 Completed at: {result.get('timestamp')}")
         
     except Exception as e:

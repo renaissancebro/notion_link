@@ -95,7 +95,8 @@ try:
     # Override calendar creation to target tomorrow
     if result.get('status') != 'error':
         ai_response = result.get('ai_response', {})
-        calendar_result = pipeline.create_calendar_events(ai_response, tomorrow)
+        planning_context = result.get('planning_context') or pipeline.build_planning_context(plan_date=tomorrow)
+        calendar_result = pipeline.create_calendar_events(ai_response, tomorrow, planning_context)
         result['calendar_result'] = calendar_result
     
     if result.get('status') == 'error':
@@ -116,6 +117,13 @@ try:
         title = event.get('title', 'Unknown')
         start = event.get('start', 'Unknown')
         print(f'EVENT_{i}: {title} at {start}')
+
+    for warning in calendar_result.get('validation_warnings', []):
+        print(f'WARNING: {warning}')
+
+    if calendar_result.get('unscheduled_action_items'):
+        items = ", ".join(calendar_result['unscheduled_action_items'])
+        print(f'UNSCHEDULED_ACTION_ITEMS: {items}')
     
 except Exception as e:
     print(f'PIPELINE_ERROR: {str(e)}')

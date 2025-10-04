@@ -92,39 +92,68 @@ class PromptGenerator:
     """Generates structured prompts for different AI tasks"""
     
     @staticmethod
-    def create_daily_planning_prompt(journal_data):
+    def create_daily_planning_prompt(journal_data, planning_context=None):
         """Create prompt for daily planning and task prioritization"""
-        base_prompt = """
-You are a productivity AI that helps entrepreneurs plan their day based on their journal entries.
+        planning_context = planning_context or {}
+        journal_json = json.dumps(journal_data, indent=2)
+        planning_json = json.dumps(planning_context, indent=2)
+        existing_events = planning_context.get('existing_calendar_events', [])
+        existing_events_json = json.dumps(existing_events, indent=2)
+        free_windows = planning_context.get('free_time_windows', [])
+        free_windows_json = json.dumps(free_windows, indent=2)
+        example_schema = {
+            "overview": "High-level goals for the day",
+            "time_blocks": [
+                {
+                    "time": "08:00-09:30",
+                    "activity": "Internship application sprint",
+                    "calendar_title": "Apply: Target Internships",
+                    "source_action_items": ["Internship outreach emails"],
+                    "notes": "Customize resumes for top roles"
+                }
+            ],
+            "calendar_events": [
+                {
+                    "title": "Apply: Target Internships",
+                    "start_time": "08:00",
+                    "end_time": "09:30",
+                    "description": "Internship outreach emails"
+                }
+            ],
+            "unassigned_action_items": [],
+            "reasoning": "Explain prioritization, how the schedule avoids conflicts, and how gaps are used"
+        }
+        schema_json = json.dumps(example_schema, indent=2)
 
-JOURNAL DATA:
+        prompt = f"""
+You are a focused productivity strategist. Build a concrete, time-blocked plan for the next workday using the journal context and actionable items below. Prioritize meaningful work streams such as internship applications, accounting study, and customer discovery outreach while preserving momentum from recent accomplishments.
+
+WORKING HOURS TO PLAN: 08:00-20:00 Central Time. Ensure the schedule is sequential, has no overlaps, and leaves no gaps longer than 60 minutes. Include purposeful breaks (e.g., lunch) and focused deep-work blocks.
+
+JOURNAL DATA (verbatim, do not repeat back verbatim):
 {journal_json}
 
-TASK:
-Based on this journal data, create a structured daily plan that includes:
+ACTIONABLE INPUTS FOR SCHEDULING (includes extracted tasks with suggested durations):
+{planning_json}
 
-1. **Morning Priorities** (2-3 high-impact tasks)
-2. **Technical Focus** (specific tools/technologies to work on)
-3. **Time Blocks** (suggested time allocation)
-4. **Improvement Actions** (based on yesterday's reflections)
-5. **Calendar Events** (specific meetings/blocks to schedule)
+EXISTING CALENDAR EVENTS (busy blocks you must respect; schedule around these and do not edit them):
+{existing_events_json}
 
-FORMAT YOUR RESPONSE AS JSON:
-{{
-  "morning_priorities": ["task1", "task2", "task3"],
-  "technical_focus": "specific technology or tool",
-  "time_blocks": [
-    {{"time": "9:00-11:00", "activity": "Deep work on X", "calendar_title": "Deep Work: X"}},
-    {{"time": "11:00-12:00", "activity": "Y", "calendar_title": "Y"}}
-  ],
-  "improvement_actions": ["action1", "action2"],
-  "calendar_events": [
-    {{"title": "Event Title", "start_time": "09:00", "duration_minutes": 120, "description": "Event description"}}
-  ],
-  "reasoning": "Brief explanation of planning decisions"
-}}
+AVAILABLE FREE WINDOWS (use these gaps for new work blocks):
+{free_windows_json}
+
+PLANNING DIRECTIVES:
+1. Every action item with an "estimated_minutes" value must appear across enough time blocks to cover that estimate; break intensive work (over ~60 minutes) into multiple focused sessions.
+2. Only schedule new work inside the free windows above; do not overlap the busy events. If a free window is longer than needed, you may split it across multiple purposeful blocks (deep work, outreach, recovery).
+3. Prioritize high-leverage tasks (internship applications, accounting study, customer discovery) early in the day before generic admin tasks.
+4. Use the provided estimates as guidance, but you may adjust by ±15 minutes to fit the available windows. Ensure the sum of blocks for a task is realistic and fits the free windows.
+5. Keep block descriptions specific and actionable so they can be placed directly onto the calendar.
+6. If any action item cannot be scheduled, list it in "unassigned_action_items" with a brief reason and a suggested next opportunity.
+
+Respond with valid JSON only using this structure (fill every field):
+{schema_json}
 """
-        return base_prompt.format(journal_json=json.dumps(journal_data, indent=2))
+        return prompt
     
     @staticmethod
     def create_reflection_prompt(journal_data):
