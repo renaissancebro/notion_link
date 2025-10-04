@@ -40,23 +40,27 @@ internship applications 1 hour + SEO 30 min
 
 ## Supported Time Formats
 
-### Time Ranges
+### Build Blocks Format (Your Current Setup)
+- `Task 2 hours` - Scheduled sequentially starting at 8am
+- `Task 30 minutes` or `Task 30 min`
+- `Task — 1 hour` - Works with or without dash
+- `Task 1 hour + Extra 30 min` - Uses first duration found
+
+**How it works:** Tasks are scheduled back-to-back starting at 8:00 AM
+- Task 1 (2 hours): 08:00-10:00
+- Task 2 (1 hour): 10:00-11:00
+- Task 3 (30 min): 11:00-11:30
+
+### Alternative: Explicit Time Ranges
 - `9:00-10:30: Task description`
 - `2pm-4pm: Another task`
 - `14:00-15:30: Task in 24-hour format`
-- `8:30-9:00 Morning standup` (with or without colon after time)
+- `8:30-9:00 Morning standup`
 
-### Single Time with Duration
+### Alternative: Single Time with Duration
 - `14:00: Review PRs (1 hour)`
 - `3pm: Team sync (30 minutes)`
 - `9:00 (2 hours): Deep work session`
-
-### Time Interpretation
-- **With AM/PM**: Uses explicit time (2pm = 14:00)
-- **Without AM/PM**:
-  - Hours 8-23: Treated literally
-  - Hours 1-7: Assumed PM (4:00 becomes 16:00)
-  - This matches typical work hours
 
 ## Planning Section Triggers
 
