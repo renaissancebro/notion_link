@@ -229,7 +229,7 @@ class JournalAIPipeline:
         """Run the complete pipeline"""
         print("🚀 Starting AI Pipeline...")
         print("="*50)
-        
+
         try:
             # Step 1: Extract journal data
             journal_data = self.extract_journal_data(target_date)
@@ -238,28 +238,44 @@ class JournalAIPipeline:
             else:
                 plan_date = date.today().isoformat()
             planning_context = self.build_planning_context(plan_date=plan_date)
-            
-            # Step 2: Prepare AI prompt
-            ai_prompt = self.prepare_ai_prompt(journal_data, task_type, planning_context)
-            
+
+            # Check if we have an explicit plan from the journal
+            explicit_plan = None
+            if self._latest_planning_source:
+                if isinstance(self._latest_planning_source, list):
+                    # Check most recent entry for explicit plan
+                    for entry in self._latest_planning_source:
+                        if entry.get("has_explicit_plan"):
+                            explicit_plan = entry.get("explicit_plan")
+                            print(f"📋 Found explicit plan with {len(explicit_plan)} items")
+                            break
+                elif isinstance(self._latest_planning_source, dict):
+                    if self._latest_planning_source.get("has_explicit_plan"):
+                        explicit_plan = self._latest_planning_source.get("explicit_plan")
+                        print(f"📋 Found explicit plan with {len(explicit_plan)} items")
+
+            # Step 2: Prepare AI prompt (uses explicit plan if available)
+            ai_prompt = self.prepare_ai_prompt(journal_data, task_type, planning_context, explicit_plan)
+
             # Step 3: Process with OpenAI
             ai_response = self.process_with_ai(ai_prompt)
-            
+
             # Step 4: Create calendar events
             calendar_result = self.create_calendar_events(ai_response, target_date, planning_context)
-            
+
             print("="*50)
             print("✅ Pipeline complete!")
-            
+
             return {
                 "journal_data": journal_data,
                 "planning_context": planning_context,
+                "explicit_plan": explicit_plan,
                 "ai_prompt": ai_prompt,
                 "ai_response": ai_response,
                 "calendar_result": calendar_result,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             print(f"❌ Pipeline failed: {e}")
             return {
