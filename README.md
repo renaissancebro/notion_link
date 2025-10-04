@@ -1,13 +1,15 @@
 # Journal AI Pipeline
 
-A Python-based system that extracts journal entries from Notion, processes them through AI, and integrates with Google Calendar for intelligent daily planning. **Now with full Google Calendar integration and Central Time support!**
+A Python-based system that extracts journal entries from Notion, processes them through AI, and integrates with Google Calendar for intelligent daily planning. **Now with smart gap-filling, action-item heuristics, and Central Time support!**
 
 ## Features
 
 - **Notion Integration**: Extracts journal content from Notion databases with smart content filtering
 - **AI Processing**: OpenAI GPT-4 analysis of journal entries for actionable insights
-- **Google Calendar Integration**: Automatically creates time-blocked calendar events
+- **Google Calendar Integration**: Automatically creates time-blocked calendar events while respecting existing meetings
 - **Smart Content Filtering**: Separates user-written content from template text
+- **Free-Window Scheduling**: Detects current calendar gaps and only proposes plan blocks that fit available windows
+- **Task Duration Heuristics**: Shortens internship, accounting, and outreach items to realistic chunks and splits deep work across multiple blocks
 - **Multi-date Support**: Process any date range and create events for future dates
 - **Central Time Zone**: Configured for America/Chicago timezone
 - **Secure OAuth2**: Protected credential management with comprehensive .gitignore
@@ -35,6 +37,8 @@ A Python-based system that extracts journal entries from Notion, processes them 
    python run.py help          # Show all usage options
    ```
 
+   The planner will pull today’s journal, look at tomorrow’s calendar, and only schedule tasks into free windows.
+
 ## Architecture
 
 Clean 3-concern separation in `src/` folder:
@@ -47,7 +51,7 @@ Clean 3-concern separation in `src/` folder:
 - **processor.py** - OpenAI integration and structured prompt generation
 
 ### 📅 **Calendar** (`src/calendar_api/`)
-- **integration.py** - Google Calendar API and event creation
+- **integration.py** - Google Calendar API, free-window detection, and conflict-aware event creation
 
 ### 🔧 **Pipeline** (`src/pipeline.py`)
 - **JournalAIPipeline** - Main orchestrator connecting all 3 concerns
@@ -113,22 +117,24 @@ data = extractor.get_journal_entry()
 
 **Real Test Results** (Yesterday → Tomorrow):
 ```bash
-python test_tomorrow_calendar.py
-# ✅ Extracted: Builder's edge journal from 2025-07-19
-# 🤖 AI Processing: Generated structured daily plan
-# 📅 Created 4 calendar events for 2025-07-21:
-#   • Notion API Setup (9:00-10:00 AM CT)  
-#   • Journal Content Creation (11:00 AM-12:00 PM CT)
-#   • Break (1:00-2:00 PM CT)
-#   • Debugging Tools Development (2:00-3:00 PM CT)
+python run.py
+# ✅ Extracted: Builder's edge journal from 2025-10-04 (and recent context)
+# 🤖 AI Processing: Generated a JSON schedule with split focus blocks
+# 📅 Calendar: 0 new events created (existing calendar already covered every free window; warnings logged instead)
 ```
+
+## Understanding the Output
+
+- **AI Prompt Preview**: `result['ai_prompt']` (or the console output) shows the structured prompt sent to GPT, including free windows and action-item estimates.
+- **Validation Warnings**: When the calendar is already full, the pipeline reports skipped blocks and unscheduled tasks instead of forcing conflicts.
+- **Logs**: Nightly runs append to `logs/cron_daily_<date>.log`, capturing the same warnings plus a list of unscheduled items for quick follow-up.
 
 ## System Status
 
 ✅ **Fully Operational**:
 - Notion extraction working
 - OpenAI GPT-4 integration active  
-- Google Calendar events creating successfully
+- Google Calendar gap-aware scheduling active
 - Central Time timezone configured
 - OAuth2 security implemented
 - Complete pipeline: Journal → AI → Calendar
