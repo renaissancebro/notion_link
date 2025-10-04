@@ -65,6 +65,8 @@ internship applications 1 hour + SEO 30 min
 ## Planning Section Triggers
 
 The system looks for these keywords to identify your planning section:
+- "build blocks" ✅ (Your format)
+- "tomorrow's system" ✅ (Your format)
 - "tomorrow"
 - "next day"
 - "plan for"
@@ -72,7 +74,10 @@ The system looks for these keywords to identify your planning section:
 - "to do"
 - "tasks for"
 
-**Examples:**
+**Your Section Header:**
+- `## 📅 Build Blocks (Tomorrow's System)` ✅
+
+**Other Valid Examples:**
 - "## Plan for Tomorrow"
 - "## Tomorrow's Schedule"
 - "## Tasks for Next Day"
