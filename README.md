@@ -60,6 +60,8 @@ Clean 3-concern separation in `src/` folder:
 ## Testing
 
 - `test_components.py` - Comprehensive test suite
+- `test_build_blocks.py` - Test Build Blocks format parsing
+- `test_explicit_plan.py` - Test time parsing patterns
 - `test_individual.py` - Test individual components
 - `print_content.py` - Clean content viewer
 - `show_content.py` - Detailed content analysis
