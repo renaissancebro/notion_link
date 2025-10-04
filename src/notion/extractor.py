@@ -183,7 +183,14 @@ class JournalExtractor:
             duration_unit = match.group(6) if match.group(6) else 'minute'
 
             # Convert to 24-hour format
-            if ampm and 'p' in ampm.lower() and hour != 12:
+            if ampm:
+                if 'p' in ampm.lower() and hour != 12:
+                    hour += 12
+                elif 'a' in ampm.lower() and hour == 12:
+                    hour = 0
+            # If no AM/PM specified and hour is ambiguous (1-7), assume PM for afternoon hours
+            elif 1 <= hour <= 7 and minute == 0:
+                # This is likely afternoon - convert to PM
                 hour += 12
 
             # Calculate duration in minutes
