@@ -90,6 +90,122 @@ class JournalExtractor:
         
         return user_content
 
+    def extract_explicit_plan(self, blocks):
+        """Extract explicit daily plan with times from planning section.
+
+        Looks for time-based entries like:
+        - 9:00-10:30: Deep work on feature X
+        - 2pm-4pm: Customer calls
+        - 14:00: Review PRs (1 hour)
+        """
+        plan_items = []
+        in_planning_section = False
+
+        for block in blocks.get("results", []):
+            block_type = block.get("type")
+            if not block_type or block_type not in block:
+                continue
+
+            block_data = block[block_type]
+            if "rich_text" not in block_data:
+                continue
+
+            texts = block_data["rich_text"]
+            content = "".join([t.get("plain_text", "") for t in texts]).strip()
+
+            if not content:
+                continue
+
+            # Check if we're entering a planning section
+            content_lower = content.lower()
+            if any(keyword in content_lower for keyword in self.planning_section_keywords):
+                in_planning_section = True
+                continue
+
+            # Skip template keywords even in planning section
+            is_template = any(keyword.lower() in content_lower for keyword in self.template_keywords)
+            if is_template:
+                continue
+
+            # If we're in planning section, try to parse time-based entries
+            if in_planning_section:
+                parsed_item = self._parse_time_entry(content)
+                if parsed_item:
+                    plan_items.append(parsed_item)
+
+        return plan_items
+
+    def _parse_time_entry(self, text):
+        """Parse a text entry for time information and task description.
+
+        Formats supported:
+        - 9:00-10:30: Task description
+        - 2pm-4pm: Task description
+        - 14:00: Task (1 hour)
+        - Task at 3pm for 2 hours
+        """
+        # Pattern 1: HH:MM-HH:MM: Task or HH:MM-HH:MM Task
+        time_range_pattern = r'(\d{1,2}):?(\d{2})?\s*([ap]m?)?\s*-\s*(\d{1,2}):?(\d{2})?\s*([ap]m?)?\s*:?\s*(.+)'
+        match = re.match(time_range_pattern, text, re.IGNORECASE)
+
+        if match:
+            start_hour = int(match.group(1))
+            start_min = int(match.group(2)) if match.group(2) else 0
+            start_ampm = match.group(3)
+            end_hour = int(match.group(4))
+            end_min = int(match.group(5)) if match.group(5) else 0
+            end_ampm = match.group(6)
+            task = match.group(7).strip()
+
+            # Convert to 24-hour format
+            if start_ampm and 'p' in start_ampm.lower() and start_hour != 12:
+                start_hour += 12
+            if end_ampm and 'p' in end_ampm.lower() and end_hour != 12:
+                end_hour += 12
+
+            return {
+                "start_time": f"{start_hour:02d}:{start_min:02d}",
+                "end_time": f"{end_hour:02d}:{end_min:02d}",
+                "task": task,
+                "source": "explicit_plan"
+            }
+
+        # Pattern 2: HH:MM: Task (duration)
+        single_time_pattern = r'(\d{1,2}):?(\d{2})?\s*([ap]m?)?\s*:?\s*(.+?)\s*(?:\((\d+)\s*(hour|hr|min|minute)s?\))?$'
+        match = re.match(single_time_pattern, text, re.IGNORECASE)
+
+        if match:
+            hour = int(match.group(1))
+            minute = int(match.group(2)) if match.group(2) else 0
+            ampm = match.group(3)
+            task = match.group(4).strip()
+            duration_value = int(match.group(5)) if match.group(5) else 60
+            duration_unit = match.group(6) if match.group(6) else 'minute'
+
+            # Convert to 24-hour format
+            if ampm and 'p' in ampm.lower() and hour != 12:
+                hour += 12
+
+            # Calculate duration in minutes
+            if 'hour' in duration_unit.lower() or 'hr' in duration_unit.lower():
+                duration_minutes = duration_value * 60
+            else:
+                duration_minutes = duration_value
+
+            start_minutes = hour * 60 + minute
+            end_minutes = start_minutes + duration_minutes
+            end_hour = end_minutes // 60
+            end_min = end_minutes % 60
+
+            return {
+                "start_time": f"{hour:02d}:{minute:02d}",
+                "end_time": f"{end_hour:02d}:{end_min:02d}",
+                "task": task,
+                "source": "explicit_plan"
+            }
+
+        return None
+
     def _infer_duration_minutes(self, text, default_minutes=60):
         """Estimate duration from free-form text using simple heuristics."""
         if not text:
