@@ -24,8 +24,12 @@ class JournalExtractor:
         self.template_keywords = [
             "Notion Template", "Daily Founder Frame", "Entrepreneur Identity Tracker",
             "Entrepreneurial Creed", "Time to Ship", "What Did I Build Today",
-            "technical rep", "Name your enemy", "Dangerous Entrepreneur", 
+            "technical rep", "Name your enemy", "Dangerous Entrepreneur",
             "Call it out", "Train your mind", "Estimate total time"
+        ]
+        # New: Keywords that indicate planning sections
+        self.planning_section_keywords = [
+            "tomorrow", "next day", "plan for", "schedule", "to do", "tasks for"
         ]
     
     def extract_user_content_from_blocks(self, blocks):
