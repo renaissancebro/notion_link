@@ -186,12 +186,16 @@ class JournalExtractor:
         - 14:00: Task (1 hour)
         - Task — X min / Task X hours (Build Blocks format)
         """
-        # Pattern 0: Build Blocks format "Task — X min" or "Task X hours"
-        build_blocks_pattern = r'(.+?)\s*[—-]\s*(\d+(?:\.\d+)?)\s*(hour|hr|min|minute)s?\s*(?:\+.*)?$'
+        # Pattern 0: Build Blocks format "Task — X min" or "Task X hours" or "Task 2 hours"
+        # Handles: "Meet with Chris 2 hours", "accounting — 1 hour", "task 30 min"
+        build_blocks_pattern = r'^(.+?)\s+(\d+(?:\.\d+)?)\s*(hour|hr|min|minute)s?\s*(?:\+.*)?$'
         match = re.match(build_blocks_pattern, text, re.IGNORECASE)
 
         if match:
             task = match.group(1).strip()
+            # Remove trailing dash if present
+            task = re.sub(r'\s*[—-]\s*$', '', task)
+
             duration_value = float(match.group(2))
             duration_unit = match.group(3).lower()
 
