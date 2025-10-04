@@ -92,6 +92,56 @@ class PromptGenerator:
     """Generates structured prompts for different AI tasks"""
     
     @staticmethod
+    def create_explicit_plan_prompt(explicit_plan, planning_context=None):
+        """Create prompt for scheduling explicit user-provided plan.
+
+        This bypasses AI inference and just validates/schedules the user's explicit plan.
+        """
+        planning_context = planning_context or {}
+        plan_json = json.dumps(explicit_plan, indent=2)
+        existing_events = planning_context.get('existing_calendar_events', [])
+        existing_events_json = json.dumps(existing_events, indent=2)
+
+        prompt = f"""
+You are a scheduling assistant. The user has provided an explicit daily plan with specific times.
+Your job is to validate it and format it for calendar creation.
+
+USER'S EXPLICIT PLAN:
+{plan_json}
+
+EXISTING CALENDAR EVENTS (to check for conflicts):
+{existing_events_json}
+
+Return a JSON response with this structure:
+{{
+  "calendar_events": [
+    {{
+      "title": "Task from user's plan",
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "description": "Task details"
+    }}
+  ],
+  "conflicts": [
+    {{
+      "plan_item": "User's task that conflicts",
+      "conflict_with": "Existing calendar event",
+      "suggestion": "How to resolve"
+    }}
+  ],
+  "validation_notes": "Any warnings or suggestions"
+}}
+
+RULES:
+1. Use the exact times and tasks from the user's plan
+2. Flag any conflicts with existing calendar events
+3. If a task doesn't have an end time, use reasonable defaults (1 hour for most tasks)
+4. Keep task titles clear and actionable
+5. Do NOT modify the user's intent - just format it for the calendar
+"""
+        return prompt
+
+    @staticmethod
     def create_daily_planning_prompt(journal_data, planning_context=None):
         """Create prompt for daily planning and task prioritization"""
         planning_context = planning_context or {}
