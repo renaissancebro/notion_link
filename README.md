@@ -136,13 +136,23 @@ data = extractor.get_journal_entry()
 
 ## Supported Time Formats
 
-The system recognizes multiple time formats in your planning section:
-- **Time ranges**: `9:00-10:30`, `2pm-4pm`, `14:00-15:30`
-- **Single time with duration**: `14:00 (1 hour)`, `3pm (30 minutes)`
-- **Without colons**: `900-1030`, `2-4pm`
-- **Flexible separators**: With or without `:` after time
+### Build Blocks Format (Your Setup)
+Tasks are scheduled sequentially starting at 8:00 AM:
+- `Task 2 hours` → 08:00-10:00
+- `Task 30 min` → 10:00-10:30
+- `Task — 1 hour` → 10:30-11:30
+
+**Supported duration formats:**
+- `Task X hours` or `Task X hour`
+- `Task X min` or `Task X minutes`
+- `Task — X hours` (with dash separator)
+
+### Alternative Formats (Also Supported)
+- **Time ranges**: `9:00-10:30: Task`, `2pm-4pm: Task`
+- **Single time with duration**: `14:00: Task (1 hour)`
 
 **Keywords that trigger planning mode:**
+- "build blocks", "tomorrow's system" (your format)
 - "tomorrow", "next day", "plan for", "schedule", "to do", "tasks for"
 
 ## Live Example
