@@ -98,6 +98,7 @@ class JournalExtractor:
         - 9:00-10:30: Deep work on feature X
         - 2pm-4pm: Customer calls
         - 14:00: Review PRs (1 hour)
+        - Task — X min (Build Blocks format)
         """
         plan_items = []
         in_planning_section = False
@@ -134,7 +135,47 @@ class JournalExtractor:
                 if parsed_item:
                     plan_items.append(parsed_item)
 
-        return plan_items
+        # Convert Build Blocks format (duration-only) to timed blocks
+        return self._schedule_build_blocks(plan_items)
+
+    def _schedule_build_blocks(self, plan_items, start_hour=8):
+        """Convert duration-only tasks to scheduled time blocks.
+
+        For Build Blocks format where tasks only have durations,
+        schedule them sequentially starting from work day start.
+        """
+        if not plan_items:
+            return []
+
+        # Check if any items have explicit times
+        has_explicit_times = any('start_time' in item for item in plan_items)
+
+        if has_explicit_times:
+            # Mix of explicit and duration-only - return as is
+            return plan_items
+
+        # All items are duration-only (Build Blocks format)
+        scheduled_items = []
+        current_minutes = start_hour * 60  # Start at 8am by default
+
+        for item in plan_items:
+            if 'duration_minutes' in item:
+                duration = item['duration_minutes']
+                start_time = f"{current_minutes // 60:02d}:{current_minutes % 60:02d}"
+                current_minutes += duration
+                end_time = f"{current_minutes // 60:02d}:{current_minutes % 60:02d}"
+
+                scheduled_items.append({
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'task': item['task'],
+                    'source': 'build_blocks_scheduled'
+                })
+            else:
+                # Already has times
+                scheduled_items.append(item)
+
+        return scheduled_items
 
     def _parse_time_entry(self, text):
         """Parse a text entry for time information and task description.
