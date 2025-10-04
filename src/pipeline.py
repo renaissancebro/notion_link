@@ -158,12 +158,17 @@ class JournalAIPipeline:
 
         return [window for window in free_windows if window['duration_minutes'] > 0]
 
-    def prepare_ai_prompt(self, journal_data, task_type="daily_planning", planning_context=None):
+    def prepare_ai_prompt(self, journal_data, task_type="daily_planning", planning_context=None, explicit_plan=None):
         """Step 2: Prepare structured prompt for OpenAI"""
         print(f"📝 Preparing AI prompt for: {task_type}")
 
         if planning_context is None and task_type == "daily_planning":
             planning_context = self.build_planning_context()
+
+        # If we have an explicit plan, use that instead of AI inference
+        if explicit_plan and len(explicit_plan) > 0:
+            print("✅ Using explicit plan from journal")
+            return PromptGenerator.create_explicit_plan_prompt(explicit_plan, planning_context)
 
         prompts = {
             "daily_planning": PromptGenerator.create_daily_planning_prompt(journal_data, planning_context),
