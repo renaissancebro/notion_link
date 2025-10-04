@@ -90,7 +90,22 @@ GOOGLE_CALENDAR_CREDENTIALS_FILE=credentials.json
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Usage Examples
+## Workflow
+
+**Your Daily Process:**
+
+1. **End of Day**: In your Notion journal, write your plan for tomorrow:
+   ```
+   ## Plan for Tomorrow
+
+   9:00-10:30: Deep work on accounting system
+   11:00-12:00: Internship applications
+   2pm-4pm: Customer discovery calls
+   4:00: Code review (1 hour)
+   ```
+
+2. **System Runs**: Pipeline extracts your explicit plan and schedules it directly to Google Calendar
+3. **Next Morning**: Wake up to your pre-planned day already on your calendar
 
 **Command Line:**
 ```bash
@@ -113,6 +128,17 @@ from src.notion.extractor import JournalExtractor
 extractor = JournalExtractor()
 data = extractor.get_journal_entry()
 ```
+
+## Supported Time Formats
+
+The system recognizes multiple time formats in your planning section:
+- **Time ranges**: `9:00-10:30`, `2pm-4pm`, `14:00-15:30`
+- **Single time with duration**: `14:00 (1 hour)`, `3pm (30 minutes)`
+- **Without colons**: `900-1030`, `2-4pm`
+- **Flexible separators**: With or without `:` after time
+
+**Keywords that trigger planning mode:**
+- "tomorrow", "next day", "plan for", "schedule", "to do", "tasks for"
 
 ## Live Example
 
