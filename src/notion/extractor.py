@@ -143,8 +143,30 @@ class JournalExtractor:
         - 9:00-10:30: Task description
         - 2pm-4pm: Task description
         - 14:00: Task (1 hour)
-        - Task at 3pm for 2 hours
+        - Task — X min / Task X hours (Build Blocks format)
         """
+        # Pattern 0: Build Blocks format "Task — X min" or "Task X hours"
+        build_blocks_pattern = r'(.+?)\s*[—-]\s*(\d+(?:\.\d+)?)\s*(hour|hr|min|minute)s?\s*(?:\+.*)?$'
+        match = re.match(build_blocks_pattern, text, re.IGNORECASE)
+
+        if match:
+            task = match.group(1).strip()
+            duration_value = float(match.group(2))
+            duration_unit = match.group(3).lower()
+
+            # Calculate duration in minutes
+            if 'hour' in duration_unit or 'hr' in duration_unit:
+                duration_minutes = int(duration_value * 60)
+            else:
+                duration_minutes = int(duration_value)
+
+            # Return without specific times - will be scheduled sequentially
+            return {
+                "task": task,
+                "duration_minutes": duration_minutes,
+                "source": "build_blocks"
+            }
+
         # Pattern 1: HH:MM-HH:MM: Task or HH:MM-HH:MM Task
         time_range_pattern = r'(\d{1,2}):?(\d{2})?\s*([ap]m?)?\s*-\s*(\d{1,2}):?(\d{2})?\s*([ap]m?)?\s*:?\s*(.+)'
         match = re.match(time_range_pattern, text, re.IGNORECASE)
