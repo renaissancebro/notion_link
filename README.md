@@ -5,11 +5,12 @@ A Python-based system that extracts journal entries from Notion, processes them 
 ## Features
 
 - **Notion Integration**: Extracts journal content from Notion databases with smart content filtering
-- **AI Processing**: OpenAI GPT-4 analysis of journal entries for actionable insights
+- **Explicit Plan Scheduling**: Write your daily plan with times at end of day - system schedules it directly to calendar
+- **AI Processing**: OpenAI GPT-4 analysis of journal entries for actionable insights (when explicit plan not provided)
 - **Google Calendar Integration**: Automatically creates time-blocked calendar events while respecting existing meetings
 - **Smart Content Filtering**: Separates user-written content from template text
 - **Free-Window Scheduling**: Detects current calendar gaps and only proposes plan blocks that fit available windows
-- **Task Duration Heuristics**: Shortens internship, accounting, and outreach items to realistic chunks and splits deep work across multiple blocks
+- **Flexible Time Formats**: Supports 9:00-10:30, 2pm-4pm, 14:00 (1 hour), and more
 - **Multi-date Support**: Process any date range and create events for future dates
 - **Central Time Zone**: Configured for America/Chicago timezone
 - **Secure OAuth2**: Protected credential management with comprehensive .gitignore
