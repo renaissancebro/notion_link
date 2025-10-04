@@ -15,11 +15,20 @@ The system now supports **direct plan scheduling** - you write your explicit dai
 
 ### Example Journal Entry
 
+**Your Exact Format (Build Blocks):**
 ```
-## Daily Reflection
+## 📅 Build Blocks (Tomorrow's System)
 
-[Your usual journal content here...]
+*(Estimate time + set anchor order)*
 
+Meet with Chris 2 hours
+accounting homework 1 hour
+python homework 1 hour
+internship applications 1 hour + SEO 30 min
+```
+
+**Alternative Format (Explicit Times):**
+```
 ## Plan for Tomorrow
 
 9:00-10:30: Deep work on accounting system
