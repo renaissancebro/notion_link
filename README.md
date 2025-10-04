@@ -94,17 +94,22 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Your Daily Process:**
 
-1. **End of Day**: In your Notion journal, write your plan for tomorrow:
+1. **End of Day**: In your Notion journal, fill out your Build Blocks section:
    ```
-   ## Plan for Tomorrow
+   ## 📅 Build Blocks (Tomorrow's System)
 
-   9:00-10:30: Deep work on accounting system
-   11:00-12:00: Internship applications
-   2pm-4pm: Customer discovery calls
-   4:00: Code review (1 hour)
+   Meet with Chris 2 hours
+   accounting homework 1 hour
+   python homework 1 hour
+   internship applications 1 hour + SEO 30 min
    ```
 
-2. **System Runs**: Pipeline extracts your explicit plan and schedules it directly to Google Calendar
+2. **System Runs**: Pipeline extracts your plan and schedules sequentially to Google Calendar
+   - Meet with Chris: 08:00-10:00
+   - accounting homework: 10:00-11:00
+   - python homework: 11:00-12:00
+   - internship applications: 12:00-13:00
+
 3. **Next Morning**: Wake up to your pre-planned day already on your calendar
 
 **Command Line:**
