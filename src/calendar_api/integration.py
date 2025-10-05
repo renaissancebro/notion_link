@@ -87,20 +87,20 @@ class GoogleCalendarIntegration:
         """Create a single calendar event"""
         if not self.is_available():
             return {"error": "Google Calendar not available"}
-        
+
         try:
             # If date_str provided, use it; otherwise use today
             if date_str:
                 event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
             else:
                 event_date = datetime.now().date()
-            
+
             # Parse time strings (e.g., "09:00", "10:30")
             start_dt = datetime.combine(
-                event_date, 
+                event_date,
                 datetime.strptime(start_time, '%H:%M').time()
             )
-            
+
             if end_time:
                 end_dt = datetime.combine(
                     event_date,
@@ -109,10 +109,33 @@ class GoogleCalendarIntegration:
             else:
                 # Default to 1 hour duration
                 end_dt = start_dt + timedelta(hours=1)
-            
+
             tz = ZoneInfo(self.TIMEZONE)
             start_dt = start_dt.replace(tzinfo=tz)
             end_dt = end_dt.replace(tzinfo=tz)
+
+            # Check for conflicts with existing events
+            existing_events = self.list_events_for_date(event_date.isoformat())
+            if existing_events and 'events' in existing_events:
+                for existing in existing_events['events']:
+                    existing_start = existing.get('start')
+                    existing_end = existing.get('end')
+
+                    if existing_start and existing_end:
+                        # Parse existing event times
+                        existing_start_dt = datetime.fromisoformat(existing_start.replace('Z', '+00:00'))
+                        existing_end_dt = datetime.fromisoformat(existing_end.replace('Z', '+00:00'))
+
+                        # Check for overlap
+                        if (start_dt < existing_end_dt and end_dt > existing_start_dt):
+                            print(f"⚠️  Skipping '{title}' - conflicts with existing event '{existing.get('title', existing.get('summary', 'Unknown'))}'")
+                            return {
+                                "skipped": True,
+                                "reason": f"Conflicts with existing event: {existing.get('title', existing.get('summary', 'Unknown'))}",
+                                "title": title,
+                                "start": start_time,
+                                "end": end_time
+                            }
 
             event = {
                 'summary': title,
