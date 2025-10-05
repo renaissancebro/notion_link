@@ -268,8 +268,8 @@ class JournalAIPipeline:
             # Step 3: Process with OpenAI
             ai_response = self.process_with_ai(ai_prompt)
 
-            # Step 4: Create calendar events
-            calendar_result = self.create_calendar_events(ai_response, target_date, planning_context)
+            # Step 4: Create calendar events for TOMORROW
+            calendar_result = self.create_calendar_events(ai_response, plan_date, planning_context)
 
             print("="*50)
             print("✅ Pipeline complete!")
