@@ -139,10 +139,10 @@ data = extractor.get_journal_entry()
 ## Supported Time Formats
 
 ### Build Blocks Format (Your Setup)
-Tasks are scheduled sequentially starting at 8:00 AM:
-- `Task 2 hours` → 08:00-10:00
-- `Task 30 min` → 10:00-10:30
-- `Task — 1 hour` → 10:30-11:30
+Tasks are scheduled sequentially starting at 9:00 AM:
+- `Task 2 hours` → 09:00-11:00
+- `Task 30 min` → 11:00-11:30
+- `Task — 1 hour` → 11:30-12:30
 
 **Supported duration formats:**
 - `Task X hours` or `Task X hour`
