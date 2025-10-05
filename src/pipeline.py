@@ -233,10 +233,18 @@ class JournalAIPipeline:
         try:
             # Step 1: Extract journal data
             journal_data = self.extract_journal_data(target_date)
+
+            # Step 1.5: Determine the plan date (always TOMORROW relative to journal date)
+            from datetime import timedelta
             if target_date:
-                plan_date = target_date if isinstance(target_date, str) else target_date.isoformat()
+                journal_date = datetime.strptime(target_date, '%Y-%m-%d').date() if isinstance(target_date, str) else target_date
             else:
-                plan_date = date.today().isoformat()
+                journal_date = date.today()
+
+            # Schedule for the NEXT day
+            plan_date = (journal_date + timedelta(days=1)).isoformat()
+            print(f"📅 Journal date: {journal_date.isoformat()} → Scheduling for: {plan_date}")
+
             planning_context = self.build_planning_context(plan_date=plan_date)
 
             # Check if we have an explicit plan from the journal
