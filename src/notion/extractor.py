@@ -138,7 +138,7 @@ class JournalExtractor:
         # Convert Build Blocks format (duration-only) to timed blocks
         return self._schedule_build_blocks(plan_items)
 
-    def _schedule_build_blocks(self, plan_items, start_hour=8):
+    def _schedule_build_blocks(self, plan_items, start_hour=9):
         """Convert duration-only tasks to scheduled time blocks.
 
         For Build Blocks format where tasks only have durations,
